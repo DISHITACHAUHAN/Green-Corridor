@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Green Corridor AI Platform | National Emergency Organ Transit Portal{% endblock %}
+
+{% block content %}
+<!-- 1. Hero Banner Area -->
+<section class="hero-banner">
+  <div class="hero-banner-inner">
+    <div class="hero-left">
+      <h1>GREEN CORRIDOR AI PLATFORM</h1>
+      <h2>AI-Based Emergency Organ Transportation & Traffic Clearance Network</h2>
+      <p>
+        A unified multi-agency digital platform connecting donor hospitals, recipient hospitals, emergency ambulance fleets, and traffic police command units. Utilizing intelligent route optimization and real-time corridor signaling to safeguard every precious minute of cold ischemia organ preservation time.
+      </p>
+      <div class="hero-buttons">
+        <a href="/control-room" class="btn btn-primary" style="padding: 8px 18px; font-size: 14px;">
+          🖥️ View Active Missions
+        </a>
+        <a href="/ambulance-management" class="btn btn-success" style="padding: 8px 18px; font-size: 14px;">
+          🚑 Track Fleet & Ambulances
+        </a>
+        <a href="/hospital-management" class="btn btn-secondary" style="padding: 8px 18px; font-size: 14px;">
+          🏥 Hospital Coordination
+        </a>
+      </div>
+    </div>
+
+    <!-- Right Route Graphic Illustration -->
+    <div class="hero-right-illustration">
+      <div style="font-weight: bold; font-size: 13px; color: #07899E; margin-bottom: 8px; text-transform: uppercase;">
+        ⚡ Live Corridor Visualization (Simulated)
+      </div>
+      <div class="hero-route-diagram">
+        <div class="hero-node">
+          <div class="hero-node-icon">🏥</div>
+          <div class="hero-node-text" style="color: #07899E;">AIIMS Delhi<br><span style="color:#666;">(Donor)</span></div>
+        </div>
+        <div class="hero-corridor-line">
+          <span style="position:absolute; top:-20px; left:40%; font-size:16px;">🚑</span>
+        </div>
+        <div class="hero-node">
+          <div class="hero-node-icon">🏥</div>
+          <div class="hero-node-text" style="color: #218653;">Max Saket<br><span style="color:#666;">(Recipient)</span></div>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 11px; color: #555; background: #FFF; padding: 6px 10px; border: 1px solid #CCC;">
+        <span>Route: <strong>Ring Road Outer</strong></span>
+        <span>Distance: <strong>7.2 km</strong></span>
+        <span>Transit ETA: <strong style="color: #218653;">12 Mins</strong></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Page Content Container -->
+<div class="page-container">
+
+  <!-- 2. Quick Access Services (6 Rectangular Boxes) -->
+  <div class="page-header-box" style="margin-top: 10px;">
+    <div>
+      <h2 class="page-title">Operational Services & Dashboards</h2>
+      <div class="page-subtitle">Centralized portals for medical directors, ambulance operators, and traffic control units</div>
+    </div>
+    <span class="badge badge-active">All Systems Operational</span>
+  </div>
+
+  <div class="services-grid">
+    <!-- Service 1 -->
+    <div class="service-box">
+      <div class="service-icon-col">🖥️</div>
+      <div class="service-content-col">
+        <h3>Central Control Room</h3>
+        <p>Complete mission command, real-time live map tracking, organ ischemia countdowns, and cross-departmental coordination.</p>
+        <a href="/control-room" class="service-link">Access Control Room &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Service 2 -->
+    <div class="service-box">
+      <div class="service-icon-col">🚑</div>
+      <div class="service-content-col">
+        <h3>Ambulance Fleet Management</h3>
+        <p>GPS tracking of ALS/BLS vehicles, telemetry status, driver allocation, and cold-chain temperature box monitoring.</p>
+        <a href="/ambulance-management" class="service-link">Manage Ambulances &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Service 3 -->
+    <div class="service-box">
+      <div class="service-icon-col">🏥</div>
+      <div class="service-content-col">
+        <h3>Hospital Coordination</h3>
+        <p>Donor-recipient matching interface, surgical retrieval logging, digital handover verification, and bed availability audit.</p>
+        <a href="/hospital-management" class="service-link">Hospital Portal &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Service 4 -->
+    <div class="service-box">
+      <div class="service-icon-col">🚦</div>
+      <div class="service-content-col">
+        <h3>Traffic Control Cell</h3>
+        <p>Dynamic corridor requests, signal override clearances, junction congestion monitoring, and police escort unit deployment.</p>
+        <a href="/traffic-control" class="service-link">Traffic Dashboard &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Service 5 -->
+    <div class="service-box">
+      <div class="service-icon-col">📍</div>
+      <div class="service-content-col">
+        <h3>Mission Tracking & Timeline</h3>
+        <p>End-to-end multi-stage audit tracking from organ retrieval in donor OT to successful transplantation in recipient theatre.</p>
+        <a href="/control-room#tracking" class="service-link">Track Active Missions &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Service 6 -->
+    <div class="service-box">
+      <div class="service-icon-col">📊</div>
+      <div class="service-content-col">
+        <h3>Analytics & Performance Reports</h3>
+        <p>Data analytics on average transportation durations, route efficiency, organ success ratios, and historical incident logs.</p>
+        <a href="/control-room#analytics" class="service-link">View Reports & Analytics &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. About Green Corridor Section -->
+  <div class="section-panel">
+    <div class="section-panel-header">
+      <span class="section-panel-title">About the National Green Corridor Network</span>
+      <span style="font-size: 11px; color: #555;">National Organ & Tissue Transplant Organization (NOTTO) Standards</span>
+    </div>
+    <div class="section-panel-body" style="background: var(--light-grey);">
+      <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px;">
+        <div>
+          <p style="margin-bottom: 12px; font-size: 14px; line-height: 1.6;">
+            A <strong>"Green Corridor"</strong> is a specialized, demarcated transit route manually or electronically cleared of routine traffic, allowing ambulances transporting harvested donor organs to travel at optimal speeds with zero red-light stops.
+          </p>
+          <p style="margin-bottom: 12px; font-size: 14px; line-height: 1.6;">
+            Every human organ has a strict <em>Cold Ischemia Time (CIT)</em> limit—the maximum duration an organ can survive outside the human body in iced preservation solution before irreversible cellular damage occurs. Our AI platform predicts route congestion, synchronizes traffic lights, and provides real-time telemetric countdowns to ensure every transplant succeeds.
+          </p>
+          <div style="background: #FFF; border-left: 3px solid var(--portal-red); padding: 8px 12px; font-size: 12px;">
+            <strong>Critical Preservation Rules:</strong> Heart (4 hours) | Lungs (6 hours) | Liver (12 hours) | Pancreas (12 hours) | Kidney (24 hours).
+          </div>
+        </div>
+        <!-- Right Statistics Box -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div style="background: #FFF; border: 1px solid #CCC; padding: 12px; text-align: center;">
+            <div style="font-size: 26px; font-weight: bold; color: var(--status-blue);" id="home-stat-missions">150+</div>
+            <div style="font-size: 11px; font-weight: bold; color: #666; text-transform: uppercase;">Missions Completed</div>
+          </div>
+          <div style="background: #FFF; border: 1px solid #CCC; padding: 12px; text-align: center;">
+            <div style="font-size: 26px; font-weight: bold; color: var(--status-green);">28</div>
+            <div style="font-size: 11px; font-weight: bold; color: #666; text-transform: uppercase;">Partner Hospitals</div>
+          </div>
+          <div style="background: #FFF; border: 1px solid #CCC; padding: 12px; text-align: center;">
+            <div style="font-size: 26px; font-weight: bold; color: var(--nav-cyan);">45</div>
+            <div style="font-size: 11px; font-weight: bold; color: #666; text-transform: uppercase;">Active Ambulances</div>
+          </div>
+          <div style="background: #FFF; border: 1px solid #CCC; padding: 12px; text-align: center;">
+            <div style="font-size: 26px; font-weight: bold; color: var(--status-yellow);">98.5%</div>
+            <div style="font-size: 11px; font-weight: bold; color: #666; text-transform: uppercase;">Delivery Success Rate</div>
+          </div>
+          <div style="grid-column: span 2; background: #FFF; border: 1px solid #CCC; padding: 10px; text-align: center;">
+            <span style="font-size: 12px; color: #555;">Average Urban Transit Time:</span>
+            <strong style="color: var(--portal-red); font-size: 16px; margin-left: 6px;">24 Minutes</strong>
+            <span style="font-size: 11px; color: #888;">(Reduced from standard 65 minutes)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. How It Works: 4 Step Process -->
+  <div class="section-panel">
+    <div class="section-panel-header">
+      <span class="section-panel-title">How the Green Corridor System Operates</span>
+      <span style="font-size: 11px; color: #555;">Standard Operating Procedure (SOP)</span>
+    </div>
+    <div class="section-panel-body">
+      <div class="process-grid">
+        <div class="process-card">
+          <div class="process-number">1</div>
+          <h4>Organ Harvested</h4>
+          <p>Donor hospital logs cross-clamp timestamp, organ viability metrics, and temperature box pairing in the portal.</p>
+        </div>
+        <div class="process-card">
+          <div class="process-number">2</div>
+          <h4>Corridor Activated</h4>
+          <p>Control Room computes fastest route via OSRM & notifies traffic police to coordinate signal priority.</p>
+        </div>
+        <div class="process-card">
+          <div class="process-number">3</div>
+          <h4>Route Cleared</h4>
+          <p>Traffic units manually override signals or clear junctions along the ambulance trajectory before arrival.</p>
+        </div>
+        <div class="process-card">
+          <div class="process-number">4</div>
+          <h4>Digital Handover</h4>
+          <p>Recipient hospital trauma team verifies cold-chain data, signs digital chain of custody, and commences transplant.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Connected Hospital Network Table -->
+  <div class="section-panel">
+    <div class="section-panel-header">
+      <span class="section-panel-title">Registered Regional Transplant Hospitals (Delhi NCR)</span>
+      <a href="/hospital-management" class="btn btn-secondary btn-sm">View Full Directory &rarr;</a>
+    </div>
+    <div class="table-responsive">
+      <table class="govt-table" id="home-hospital-table">
+        <thead>
+          <tr>
+            <th>Hospital ID</th>
+            <th>Hospital Name</th>
+            <th>City / State</th>
+            <th>Facility Type</th>
+            <th>Emergency Desk</th>
+            <th>Available ICU Beds</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="home-hospital-tbody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 6. Contact & Helpdesk Section -->
+  <div class="section-panel">
+    <div class="section-panel-header">
+      <span class="section-panel-title">Emergency Helpdesk & Multi-Agency Coordination Desk</span>
+    </div>
+    <div class="section-panel-body">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <!-- Contact Form -->
+        <div>
+          <h4 style="font-size: 14px; margin-bottom: 10px; color: var(--dark-cyan); border-bottom: 1px solid #CCC; padding-bottom: 4px;">
+            Submit Urgent Inquiry / Route Coordination Request
+          </h4>
+          <form onsubmit="event.preventDefault(); window.showToast('Your emergency coordination request has been logged. Control Room officer will call back within 2 minutes.', 'success'); this.reset();">
+            <div class="form-group">
+              <label class="form-label">Contact Person / Officer Name:</label>
+              <input type="text" class="form-control" placeholder="e.g. Dr. A. Sharma / SI V. Kumar" required>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div class="form-group">
+                <label class="form-label">Official Department / Hospital:</label>
+                <input type="text" class="form-control" placeholder="e.g. AIIMS Trauma / Delhi Police" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Emergency Mobile Number:</label>
+                <input type="tel" class="form-control" placeholder="+91-XXXXX-XXXXX" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Inquiry or Mission Briefing:</label>
+              <textarea class="form-control" rows="3" placeholder="Specify organ type, donor hospital, recipient destination, or traffic bottleneck details..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Transmit Request to Command Desk</button>
+          </form>
+        </div>
+
+        <!-- Helpdesk Contact Info -->
+        <div style="background: #FAFAFA; border: 1px solid #DDD; padding: 15px;">
+          <h4 style="font-size: 14px; margin-bottom: 10px; color: var(--portal-red); border-bottom: 1px solid #CCC; padding-bottom: 4px;">
+            24x7 Control Room Hotlines
+          </h4>
+          <table style="width: 100%; font-size: 12px; line-height: 1.8;">
+            <tr>
+              <td><strong>National Emergency Helpline:</strong></td>
+              <td style="color: var(--portal-red); font-weight: bold; font-size: 14px;">108 / 112</td>
+            </tr>
+            <tr>
+              <td><strong>Green Corridor Hotline:</strong></td>
+              <td>+91-11-26588500 (Ext. 402)</td>
+            </tr>
+            <tr>
+              <td><strong>Traffic Police Coordination:</strong></td>
+              <td>+91-11-25844444 / 1095</td>
+            </tr>
+            <tr>
+              <td><strong>NOTTO Central Registry:</strong></td>
+              <td>1800-11-4770 (Toll Free)</td>
+            </tr>
+            <tr>
+              <td><strong>Duty Officer Email:</strong></td>
+              <td>duty.officer@greencorridor.nic.in</td>
+            </tr>
+            <tr>
+              <td><strong>Central Command HQ:</strong></td>
+              <td>3rd Floor, Trauma Command Center, Ring Road, Ansari Nagar, New Delhi - 110029</td>
+            </tr>
+          </table>
+          <div style="margin-top: 15px; padding: 8px; background: #EAF5F8; border-left: 3px solid var(--dark-cyan); font-size: 11px;">
+            💡 <strong>Notice to Drivers:</strong> In case of GPS loss or route diversion, immediately flash emergency beacon and press SOS button on the dashboard console.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Populate hospital table on homepage
+    if (window.GC_DATA && window.GC_DATA.hospitals) {
+      const tbody = document.getElementById('home-hospital-tbody');
+      if (tbody) {
+        tbody.innerHTML = window.GC_DATA.hospitals.slice(0, 6).map(h => `
+          <tr>
+            <td><strong>${h.id}</strong></td>
+            <td><strong>${h.name}</strong><br><span style="color:#666;font-size:11px;">${h.address}</span></td>
+            <td>${h.city}, ${h.state}</td>
+            <td><span class="badge ${h.type === 'Donor' ? 'badge-blue' : (h.type === 'Recipient' ? 'badge-green' : 'badge-organ')}">${h.type} Facility</span></td>
+            <td>${h.phone}</td>
+            <td style="text-align:center;"><strong>${h.availableBeds}</strong> Beds</td>
+            <td><span class="badge badge-active">Active</span></td>
+          </tr>
+        `).join('');
+      }
+
+      // Update total missions counter if element exists
+      const totalM = document.getElementById('home-stat-missions');
+      if (totalM && window.GC_DATA.missions) {
+        totalM.textContent = (145 + window.GC_DATA.missions.length) + '+';
+      }
+    }
+  });
+</script>
+{% endblock %}

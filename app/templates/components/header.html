@@ -1,0 +1,178 @@
+<!-- ==========================================================================
+     GREEN CORRIDOR AI PLATFORM - COMMON REUSABLE GOVERNMENT HEADER
+     Inspired by traditional Indian Government Portals (UP Janhit Swasthya Portal)
+     ========================================================================== -->
+
+<!-- 1. Top Black Utility Bar -->
+<div class="top-utility-bar">
+  <div class="utility-container">
+    <div class="utility-left">
+      <span class="utility-clock" id="utility-datetime">🕒 Tuesday, November 17, 2026 7:23:21 PM</span>
+      <a href="#main-content" class="utility-link">Skip to Main Content</a>
+      <a href="javascript:void(0)" class="utility-link">Screen Reader Access</a>
+      <a href="javascript:void(0)" class="utility-link">Sitemap</a>
+    </div>
+    <div class="utility-right">
+      <div class="font-resizer">
+        <button type="button" class="font-btn" id="font-decrease" title="Decrease Font">A-</button>
+        <button type="button" class="font-btn" id="font-reset" title="Normal Font">A</button>
+        <button type="button" class="font-btn" id="font-increase" title="Increase Font">A+</button>
+      </div>
+      <button type="button" class="lang-selector" onclick="alert('Language toggled: हिन्दी / English')">हिन्दी / English</button>
+      <div class="utility-search-box">
+        <input type="text" class="utility-search-input" placeholder="Search here..." id="utility-search">
+        <button type="button" class="utility-search-btn" onclick="alert('Search initiated: ' + document.getElementById('utility-search').value)">🔍</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Main White Header -->
+<header class="main-header">
+  <div class="header-container">
+    <!-- Left Column: Department & Emblem -->
+    <div class="header-dept-section">
+      <div class="govt-emblem-badge" title="Green Corridor Emblem">
+        <span>⚕</span>
+        <span class="emblem-sub">GC-EMS</span>
+      </div>
+      <div class="header-dept-text">
+        <h3>Department of Emergency Medical Services</h3>
+        <p>Green Corridor AI Platform</p>
+        <div class="sub-demo">Emergency Organ Transportation Network (Project Demonstration)</div>
+      </div>
+    </div>
+
+    <!-- Center Column: Portal Title -->
+    <div class="header-center-section">
+      <div class="portal-title">GREEN CORRIDOR AI PLATFORM</div>
+      <div class="header-title-divider"></div>
+      <div class="portal-tagline">NATIONAL EMERGENCY ORGAN TRANSPORTATION & TRAFFIC CLEARANCE COORDINATION PORTAL</div>
+    </div>
+
+    <!-- Right Column: Emergency Helpline -->
+    <div class="header-helpline-section">
+      <div class="helpline-icon-box">📞</div>
+      <div class="helpline-details">
+        <div>Emergency Helpline: <strong>108 / 112</strong></div>
+        <div>Control Room: <strong>+91-11-26588500</strong></div>
+        <div>Timing: <strong>24x7 Operations (All Days)</strong></div>
+        <div>Email: <strong>support@greencorridor.nic.in</strong></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- 3. Cyan Navigation Bar -->
+<nav class="cyan-navbar">
+  <div class="nav-container">
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">🏠 Home</a>
+      </li>
+      <li class="nav-item">
+        <a href="/about" class="nav-link {% if request.url.path == '/about' %}active{% endif %}">
+          About Us <span class="arrow-down">▼</span>
+        </a>
+        <ul class="nav-dropdown">
+          <li><a href="/about">About Green Corridor</a></li>
+          <li><a href="/about#how-it-works">How System Works</a></li>
+          <li><a href="/about#organ-limits">Cold Ischemia Protocols</a></li>
+          <li><a href="/about#team">Project Team</a></li>
+        </ul>
+      </li>
+      <li class="nav-item">
+        <a href="javascript:void(0)" class="nav-link">
+          Online Services <span class="arrow-down">▼</span>
+        </a>
+        <ul class="nav-dropdown">
+          <li><a href="/control-room" onclick="setTimeout(()=>window.openModal('create-mission-modal'), 300)">Request Organ Corridor</a></li>
+          <li><a href="/ambulance-management">Register Ambulance Fleet</a></li>
+          <li><a href="/hospital-management">Hospital Registration</a></li>
+          <li><a href="/traffic-control">Traffic Clearance Approval</a></li>
+        </ul>
+      </li>
+      <li class="nav-item">
+        <a href="/control-room" class="nav-link {% if request.url.path == '/control-room' %}active{% endif %}">
+          Control Room
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/ambulance-management" class="nav-link {% if request.url.path == '/ambulance-management' %}active{% endif %}">
+          Ambulance Management
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/hospital-management" class="nav-link {% if request.url.path == '/hospital-management' %}active{% endif %}">
+          Hospital Management
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/traffic-control" class="nav-link {% if request.url.path == '/traffic-control' %}active{% endif %}">
+          Traffic Control
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/control-room#tracking" class="nav-link">
+          Mission Tracking
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/control-room#analytics" class="nav-link">
+          Analytics & Reports
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/contact" class="nav-link {% if request.url.path == '/contact' %}active{% endif %}">
+          Contact Us
+        </a>
+      </li>
+    </ul>
+
+    <!-- Nav Right: Notifications & Login -->
+    <div class="nav-right-actions">
+      <!-- Notification Bell -->
+      <div style="position:relative;">
+        <button type="button" class="notif-bell-btn" id="notif-bell-btn" title="System Notifications">
+          🔔 <span class="notif-badge" id="notif-unread-count">3</span>
+        </button>
+        <!-- Dropdown Notifications Panel -->
+        <div id="notif-dropdown-panel" style="display:none;position:absolute;right:0;top:100%;width:340px;background:#FFF;border:1px solid #CCC;box-shadow:0 4px 12px rgba(0,0,0,0.2);z-index:2000;">
+          <div style="background:#07899E;color:#FFF;padding:8px 12px;font-size:12px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;">
+            <span>Emergency Corridor Alerts</span>
+            <button id="notif-mark-read" style="background:none;border:none;color:#FFF;cursor:pointer;font-size:11px;text-decoration:underline;">Mark all read</button>
+          </div>
+          <ul id="notif-dropdown-list" style="list-style:none;max-height:280px;overflow-y:auto;padding:0;margin:0;"></ul>
+          <div style="background:#F2F2F2;padding:6px;text-align:center;">
+            <a href="/control-room" style="font-size:11px;font-weight:bold;color:#07899E;">View Control Room Feed &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Auth Portal Button -->
+      <a href="/login" class="nav-auth-badge" title="Officer Login">
+        🔒 Officer Login
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- 4. Red Horizontal Announcement Strip -->
+<div class="announcement-strip">
+  <div class="ticker-container">
+    <div class="ticker-label">
+      <span>📢 HIGHLIGHTS</span>
+    </div>
+    <div class="ticker-content">
+      <div class="ticker-text">
+        ⚡ [ACTIVE CORRIDOR] Mission GC-2026-DEL-435: Kidney transport active on Ring Road AIIMS to Max Saket (ETA: 12 mins). &nbsp;&nbsp;|&nbsp;&nbsp; 
+        🫀 [CRITICAL] Mission GC-2026-DEL-436: Heart harvesting cleared at Safdarjung for Fortis Escorts. &nbsp;&nbsp;|&nbsp;&nbsp; 
+        🚦 [TRAFFIC ALERT] Ashram Chowk & South Extension flyovers activated for emergency clearance. &nbsp;&nbsp;|&nbsp;&nbsp; 
+        🏥 [NOTTO PROTOCOL] All connected hospitals instructed to maintain cold-chain sensors between 2°C and 6°C.
+      </div>
+    </div>
+    <div class="ticker-controls">
+      <button type="button" class="ticker-btn" id="ticker-pause-btn" title="Pause / Play">⏸</button>
+    </div>
+  </div>
+</div>

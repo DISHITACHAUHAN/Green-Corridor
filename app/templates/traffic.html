@@ -1,0 +1,539 @@
+{% extends "base.html" %}
+
+{% block title %}Traffic Control Cell - Green Corridor Clearance & Junction Override | Green Corridor{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div class="breadcrumb-bar">
+  <div class="breadcrumb-container">
+    <a href="/">Home</a>
+    <span class="breadcrumb-separator">&gt;</span>
+    <span>Operational Portals</span>
+    <span class="breadcrumb-separator">&gt;</span>
+    <span class="breadcrumb-current">Traffic Control</span>
+  </div>
+</div>
+
+<div class="page-container">
+
+  <!-- Page Header Box -->
+  <div class="page-header-box">
+    <div>
+      <h1 class="page-title">Traffic Police Joint Command Cell — Green Corridor Control</h1>
+      <div class="page-subtitle">Dynamic signal priority overrides, emergency corridor activation, junction clearing & patrol unit allocation</div>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button type="button" class="btn btn-primary" onclick="openModal('create-corridor-modal')">
+        🚦 Create Corridor Request
+      </button>
+      <button type="button" class="btn btn-secondary" onclick="exportTableToCSV('traffic-table', 'traffic_junctions.csv')">
+        📥 Export Junction Log
+      </button>
+      <button type="button" class="btn btn-secondary" onclick="location.reload()">
+        🔄 Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Simulation Notice Banner -->
+  <div style="background: #EAF5F8; border-left: 4px solid var(--nav-cyan); padding: 8px 12px; font-size: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <strong>⚠ Simulation & Demonstration Mode:</strong> Traffic signal override commands and automated junction clearances are simulated in software. In field deployment, this integrates via the Centralized Traffic Management System (CTMS / ITMS) SCADA API.
+    </div>
+    <span class="badge badge-active">SCADA Bridge Ready</span>
+  </div>
+
+  <!-- 1. Traffic Overview Stats -->
+  <div class="stats-row">
+    <div class="stat-box stat-blue">
+      <div class="stat-data">
+        <span class="stat-num" id="traf-stat-active-corridors">0</span>
+        <span class="stat-label">Active Green Corridors</span>
+      </div>
+      <div class="stat-icon">🟢</div>
+    </div>
+    <div class="stat-box stat-yellow">
+      <div class="stat-data">
+        <span class="stat-num" id="traf-stat-pending-clearance" style="color: var(--status-yellow);">0</span>
+        <span class="stat-label">Pending Clearance</span>
+      </div>
+      <div class="stat-icon">⏳</div>
+    </div>
+    <div class="stat-box stat-green">
+      <div class="stat-data">
+        <span class="stat-num" id="traf-stat-cleared-junctions" style="color: var(--status-green);">0</span>
+        <span class="stat-label">Cleared Junctions</span>
+      </div>
+      <div class="stat-icon">✅</div>
+    </div>
+    <div class="stat-box stat-cyan">
+      <div class="stat-data">
+        <span class="stat-num" id="traf-stat-police-units">12</span>
+        <span class="stat-label">Patrol Units Deployed</span>
+      </div>
+      <div class="stat-icon">👮</div>
+    </div>
+    <div class="stat-box stat-red">
+      <div class="stat-data">
+        <span class="stat-num" id="traf-stat-bottlenecks" style="color: var(--status-red);">1</span>
+        <span class="stat-label">Congestion Bottlenecks</span>
+      </div>
+      <div class="stat-icon">⚠️</div>
+    </div>
+  </div>
+
+  <!-- 2. Active Corridors Highlight Banner -->
+  <div class="section-panel">
+    <div class="section-panel-header" style="background: #EAF5F8;">
+      <span class="section-panel-title">Active Live Corridors Under Traffic Police Escort</span>
+      <span style="font-size: 11px; color: var(--status-green); font-weight: bold;">● Real-time Convoy Tracking</span>
+    </div>
+    <div class="section-panel-body" id="active-corridors-container">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- 3. Traffic Junctions Grid Table -->
+  <div class="section-panel">
+    <div class="section-panel-header">
+      <span class="section-panel-title">Critical Traffic Intersections & Signal State Roster</span>
+      <span style="font-size: 11px; color: #555;">Signal Overrides & Junction Patrols</span>
+    </div>
+
+    <!-- Table Toolbar -->
+    <div class="table-toolbar">
+      <div class="toolbar-left">
+        <input type="text" id="traffic-search" class="table-search-input" placeholder="🔍 Search Junction, Sector, Police Unit...">
+        <select id="traffic-status-filter" class="table-filter-select">
+          <option value="">All Corridor States</option>
+          <option value="Activated">Activated</option>
+          <option value="Clearance Requested">Clearance Requested</option>
+          <option value="Cleared">Cleared</option>
+          <option value="Normal">Normal</option>
+        </select>
+      </div>
+      <div class="toolbar-right">
+        <span style="font-size: 12px; color: #666;" id="traffic-count-badge">Showing 0 junctions</span>
+      </div>
+    </div>
+
+    <!-- Junction Table -->
+    <div class="table-responsive">
+      <table class="govt-table" id="traffic-table">
+        <thead>
+          <tr>
+            <th>Junction ID</th>
+            <th>Intersection Name & Details</th>
+            <th>Location Landmark</th>
+            <th>Traffic Density</th>
+            <th>Signal State</th>
+            <th>Assigned Police Escort Unit</th>
+            <th>Corridor Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="traffic-tbody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 4. Selected Junction Detail Panel -->
+  <div class="section-panel" id="jn-detail-panel" style="display: none;">
+    <div class="section-panel-header" style="background: #EAF5F8;">
+      <span class="section-panel-title" id="jn-detail-title">Junction Console: AIIMS Ring Road</span>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('jn-detail-panel').style.display='none'">✕ Close</button>
+    </div>
+    <div class="section-panel-body">
+      <div class="mission-detail-grid">
+        <div class="detail-card">
+          <h4>📍 Junction Attributes</h4>
+          <div class="detail-row"><span class="detail-key">Junction ID:</span><span class="detail-val" id="det-jn-id">-</span></div>
+          <div class="detail-row"><span class="detail-key">Name:</span><span class="detail-val" id="det-jn-name">-</span></div>
+          <div class="detail-row"><span class="detail-key">Jurisdiction:</span><span class="detail-val">Delhi Traffic Police - South Dist.</span></div>
+          <div class="detail-row"><span class="detail-key">Coordinates:</span><span class="detail-val" id="det-jn-coords">-</span></div>
+        </div>
+        <div class="detail-card">
+          <h4>🚦 Live Signal Telemetry</h4>
+          <div class="detail-row"><span class="detail-key">Signal Override:</span><span class="detail-val" id="det-jn-signal" style="color:var(--status-green);font-weight:bold;">-</span></div>
+          <div class="detail-row"><span class="detail-key">Current Density:</span><span class="detail-val" id="det-jn-density">-</span></div>
+          <div class="detail-row"><span class="detail-key">Corridor Status:</span><span class="detail-val" id="det-jn-status">-</span></div>
+          <div class="detail-row"><span class="detail-key">Associated Mission:</span><span class="detail-val" id="det-jn-mission">GC-2026-DEL-435</span></div>
+        </div>
+        <div class="detail-card">
+          <h4>👮 Ground Unit Interventions</h4>
+          <div class="detail-row"><span class="detail-key">Assigned Unit:</span><span class="detail-val" id="det-jn-unit">-</span></div>
+          <div class="detail-row"><span class="detail-key">Wireless Ch.:</span><span class="detail-val">VHF Band 142.85 MHz</span></div>
+          <div style="margin-top: 10px; display: flex; gap: 6px;">
+            <button type="button" class="btn btn-success btn-sm" onclick="overrideSignalGreen()">Override Signal (GREEN)</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="resetSignalNormal()">Reset Normal</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Live Traffic Map -->
+  <div class="section-panel">
+    <div class="section-panel-header">
+      <span class="section-panel-title">GIS Traffic Clearance Route Map</span>
+      <div style="display: flex; gap: 10px; font-size: 11px;">
+        <span>🟢 Cleared Junction</span>
+        <span>🔵 Active Corridor</span>
+        <span>🟠 Pending Clearance</span>
+        <span>🔴 Congestion Area</span>
+      </div>
+    </div>
+    <div class="section-panel-body" style="padding: 0;">
+      <div id="traffic-map" class="map-container"></div>
+    </div>
+  </div>
+
+  <!-- 6. Historical Corridor Clearances Table -->
+  <div class="section-panel">
+    <div class="section-panel-header">
+      <span class="section-panel-title">Recent Corridor Operations Log</span>
+      <span style="font-size: 11px; color: #555;">Delhi Police Escort Archive</span>
+    </div>
+    <div class="table-responsive">
+      <table class="govt-table">
+        <thead>
+          <tr>
+            <th>Date & Time</th>
+            <th>Mission Reference</th>
+            <th>Organ Transported</th>
+            <th>Corridor Trajectory</th>
+            <th>Junctions Cleared</th>
+            <th>Transit Time</th>
+            <th>Commanding Officer</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>17-Nov-2026 15:30</td>
+            <td><strong>GC-2026-DEL-430</strong></td>
+            <td><span class="badge badge-organ">Liver</span></td>
+            <td>BLK-Max &rarr; AIIMS New Delhi</td>
+            <td>6 Intersections</td>
+            <td><strong>24 Mins</strong></td>
+            <td>Insp. R.K. Meena</td>
+            <td><span class="badge badge-green">Success</span></td>
+          </tr>
+          <tr>
+            <td>16-Nov-2026 11:15</td>
+            <td><strong>GC-2026-DEL-428</strong></td>
+            <td><span class="badge badge-organ">Heart</span></td>
+            <td>Safdarjung &rarr; Medanta Gurugram</td>
+            <td>11 Intersections</td>
+            <td><strong>31 Mins</strong></td>
+            <td>ACP V. Sharma</td>
+            <td><span class="badge badge-green">Success</span></td>
+          </tr>
+          <tr>
+            <td>15-Nov-2026 09:40</td>
+            <td><strong>GC-2026-DEL-425</strong></td>
+            <td><span class="badge badge-organ">Kidney</span></td>
+            <td>AIIMS &rarr; Apollo Sarita Vihar</td>
+            <td>8 Intersections</td>
+            <td><strong>19 Mins</strong></td>
+            <td>SI Manoj Yadav</td>
+            <td><span class="badge badge-green">Success</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal: Create Corridor Request -->
+<div class="modal-overlay" id="create-corridor-modal">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <span class="modal-title">Authorize Green Corridor Traffic Priority Request</span>
+      <button type="button" class="modal-close-btn" onclick="closeModal('create-corridor-modal')">&times;</button>
+    </div>
+    <form id="create-corridor-form" onsubmit="handleCreateCorridor(event)">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Select Active Emergency Mission: *</label>
+          <select class="form-control" id="corridor-mission-select" required>
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Police Escort Sector: *</label>
+          <select class="form-control" id="corridor-sector" required>
+            <option value="South District - Ring Road">South District - Ring Road Expressway</option>
+            <option value="South-East - Mathura Road">South-East - Mathura Road Corridor</option>
+            <option value="Central - ITO / Vikas Marg">Central - ITO / Vikas Marg</option>
+            <option value="Interstate - NH-48 Delhi-Gurugram">Interstate - NH-48 Delhi-Gurugram</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Intersections to Override / Clear: *</label>
+          <div style="background: #F9F9F9; border: 1px solid #CCC; padding: 10px; max-height: 120px; overflow-y: auto;">
+            <label style="display:block;margin-bottom:4px;"><input type="checkbox" checked> JN-001: AIIMS Ring Road Crossing</label>
+            <label style="display:block;margin-bottom:4px;"><input type="checkbox" checked> JN-002: South Extension Flyover</label>
+            <label style="display:block;margin-bottom:4px;"><input type="checkbox" checked> JN-003: Moolchand Underpass</label>
+            <label style="display:block;margin-bottom:4px;"><input type="checkbox" checked> JN-006: Saket Metro Intersection</label>
+            <label style="display:block;margin-bottom:4px;"><input type="checkbox"> JN-004: Ashram Chowk</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Authorizing Traffic Officer Name & Badge: *</label>
+          <input type="text" class="form-control" id="corridor-officer" placeholder="e.g. Insp. R.K. Meena (Badge #TP-884)" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('create-corridor-modal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Activate Green Corridor</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let trafMap, trafMarkersLayer;
+  let selectedJunction = null;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    renderTrafficStats();
+    renderActiveCorridors();
+    renderTrafficTable();
+    populateMissionSelect();
+    initTrafficMap();
+
+    // Filters
+    document.getElementById('traffic-search').addEventListener('keyup', filterTrafficTable);
+    document.getElementById('traffic-status-filter').addEventListener('change', filterTrafficTable);
+  });
+
+  function renderTrafficStats() {
+    const jns = window.GC_DATA.trafficJunctions;
+    const missions = window.GC_DATA.missions;
+
+    const activeCorridors = missions.filter(m => m.status === 'In Transit').length;
+    const pendingClearance = jns.filter(j => j.corridorStatus === 'Clearance Requested').length;
+    const cleared = jns.filter(j => j.corridorStatus === 'Cleared').length;
+
+    document.getElementById('traf-stat-active-corridors').textContent = activeCorridors;
+    document.getElementById('traf-stat-pending-clearance').textContent = pendingClearance;
+    document.getElementById('traf-stat-cleared-junctions').textContent = cleared;
+  }
+
+  function renderActiveCorridors() {
+    const container = document.getElementById('active-corridors-container');
+    const missions = window.GC_DATA.missions.filter(m => m.status === 'In Transit');
+
+    if (missions.length === 0) {
+      container.innerHTML = '<p style="color:#666;font-size:13px;padding:8px 0;">No live corridors active at this moment.</p>';
+      return;
+    }
+
+    container.innerHTML = missions.map(m => `
+      <div style="background:#FFF;border:1px solid #CCC;border-left:4px solid var(--status-green);padding:10px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-weight:bold;font-size:14px;color:#222;">
+            Corridor #${m.id}: <span style="color:var(--status-green);">${m.donorHospital} &rarr; ${m.recipientHospital}</span>
+          </div>
+          <div style="font-size:12px;color:#555;margin-top:2px;">
+            Payload: <strong style="color:var(--portal-red);">${m.organType}</strong> | Vehicle: <strong>${m.ambulanceId}</strong> | Driver: <strong>${m.driverName}</strong>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="text-align:right;">
+            <div style="font-size:11px;color:#666;">Transit ETA</div>
+            <strong style="color:var(--status-green);font-size:16px;">${m.etaMinutes} Mins</strong>
+          </div>
+          <span class="badge badge-green">Priority Signal Lock</span>
+          <button class="btn btn-secondary btn-sm" onclick="window.showToast('Police escort convoy radio linked', 'info')">📡 Police Radio Link</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderTrafficTable() {
+    const tbody = document.getElementById('traffic-tbody');
+    const jns = window.GC_DATA.trafficJunctions;
+    document.getElementById('traffic-count-badge').textContent = `Showing ${jns.length} junctions`;
+
+    tbody.innerHTML = jns.map(j => {
+      let densityBadge = 'badge-green';
+      if (j.trafficDensity === 'High' || j.trafficDensity === 'Congested') densityBadge = 'badge-red';
+      else if (j.trafficDensity === 'Medium') densityBadge = 'badge-yellow';
+
+      let statusBadge = 'badge-grey';
+      if (j.corridorStatus === 'Activated') statusBadge = 'badge-blue';
+      else if (j.corridorStatus === 'Cleared') statusBadge = 'badge-green';
+      else if (j.corridorStatus === 'Clearance Requested') statusBadge = 'badge-yellow';
+
+      return `
+        <tr>
+          <td><strong>${j.id}</strong></td>
+          <td><strong>${j.name}</strong></td>
+          <td>${j.location}</td>
+          <td><span class="badge ${densityBadge}">${j.trafficDensity}</span></td>
+          <td><span style="font-weight:bold;color:${j.signalStatus.includes('Activated') ? 'var(--status-green)' : '#444'}">${j.signalStatus}</span></td>
+          <td>${j.assignedUnit}</td>
+          <td><span class="badge ${statusBadge}">${j.corridorStatus}</span></td>
+          <td>
+            <button class="btn btn-primary btn-sm" onclick="viewJunctionDetails('${j.id}')">Inspect</button>
+            <button class="btn btn-success btn-sm" onclick="clearJunction('${j.id}')" title="Approve Clearance">Clear</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function populateMissionSelect() {
+    const select = document.getElementById('corridor-mission-select');
+    if (!select) return;
+    const missions = window.GC_DATA.missions.filter(m => m.status !== 'Completed');
+    select.innerHTML = missions.map(m => `
+      <option value="${m.id}">${m.id} (${m.organType}: ${m.donorHospital} -> ${m.recipientHospital})</option>
+    `).join('');
+  }
+
+  function viewJunctionDetails(jnId) {
+    selectedJunction = window.GC_DATA.trafficJunctions.find(j => j.id === jnId);
+    if (!selectedJunction) return;
+
+    const j = selectedJunction;
+    document.getElementById('jn-detail-panel').style.display = 'block';
+    document.getElementById('jn-detail-title').textContent = `Junction Console: ${j.name} (${j.id})`;
+
+    document.getElementById('det-jn-id').textContent = j.id;
+    document.getElementById('det-jn-name').textContent = j.name;
+    document.getElementById('det-jn-coords').textContent = `${j.lat.toFixed(4)}, ${j.lng.toFixed(4)}`;
+    document.getElementById('det-jn-signal').textContent = j.signalStatus;
+    document.getElementById('det-jn-density').textContent = j.trafficDensity;
+    document.getElementById('det-jn-status').textContent = j.corridorStatus;
+    document.getElementById('det-jn-unit').textContent = j.assignedUnit;
+
+    if (trafMap) {
+      trafMap.setView([j.lat, j.lng], 15);
+    }
+  }
+
+  function clearJunction(jnId) {
+    window.GC_DATA.updateJunctionStatus(jnId, 'Cleared');
+    renderTrafficStats();
+    renderTrafficTable();
+    window.showToast(`Junction ${jnId} cleared for ambulance approach!`, 'success');
+  }
+
+  function overrideSignalGreen() {
+    if (!selectedJunction) return;
+    window.GC_DATA.updateJunctionStatus(selectedJunction.id, 'Activated');
+    renderTrafficStats();
+    renderTrafficTable();
+    viewJunctionDetails(selectedJunction.id);
+    window.showToast(`Signal at ${selectedJunction.name} overridden to GREEN corridor!`, 'success');
+  }
+
+  function resetSignalNormal() {
+    if (!selectedJunction) return;
+    window.GC_DATA.updateJunctionStatus(selectedJunction.id, 'Normal');
+    renderTrafficStats();
+    renderTrafficTable();
+    viewJunctionDetails(selectedJunction.id);
+    window.showToast(`Signal at ${selectedJunction.name} returned to standard automated cycle.`, 'info');
+  }
+
+  function filterTrafficTable() {
+    const searchVal = document.getElementById('traffic-search').value.toLowerCase();
+    const statusVal = document.getElementById('traffic-status-filter').value;
+    const rows = document.querySelectorAll('#traffic-tbody tr');
+    let count = 0;
+
+    rows.forEach(row => {
+      const text = row.innerText.toLowerCase();
+      const statusText = row.children[6].innerText.trim();
+      const matchesSearch = text.includes(searchVal);
+      const matchesStatus = !statusVal || statusText === statusVal;
+
+      if (matchesSearch && matchesStatus) {
+        row.style.display = '';
+        count++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    document.getElementById('traffic-count-badge').textContent = `Showing ${count} junctions`;
+  }
+
+  function handleCreateCorridor(e) {
+    e.preventDefault();
+    const missionId = document.getElementById('corridor-mission-select').value;
+    const officer = document.getElementById('corridor-officer').value;
+
+    window.GC_DATA.trafficJunctions.slice(0, 4).forEach(j => {
+      j.corridorStatus = 'Activated';
+      j.signalStatus = 'Corridor Activated';
+      j.relatedMissionId = missionId;
+    });
+
+    window.GC_DATA.saveAll();
+    closeModal('create-corridor-modal');
+    renderTrafficStats();
+    renderActiveCorridors();
+    renderTrafficTable();
+
+    window.showToast(`Green Corridor authorized by ${officer} for Mission ${missionId}!`, 'success');
+  }
+
+  function initTrafficMap() {
+    const mapEl = document.getElementById('traffic-map');
+    if (!mapEl) return;
+
+    trafMap = L.map('traffic-map').setView([28.5672, 77.2100], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(trafMap);
+
+    trafMarkersLayer = L.layerGroup().addTo(trafMap);
+
+    // Plot junctions
+    window.GC_DATA.trafficJunctions.forEach(j => {
+      let color = '#218653';
+      if (j.trafficDensity === 'High' || j.trafficDensity === 'Congested') color = '#C53030';
+      else if (j.corridorStatus === 'Activated') color = '#12A6B9';
+
+      L.circleMarker([j.lat, j.lng], {
+        radius: 9,
+        fillColor: color,
+        color: '#FFFFFF',
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.9
+      }).bindPopup(`<strong>🚦 ${j.name}</strong><br>Traffic: ${j.trafficDensity}<br>Signal: ${j.signalStatus}<br>Unit: ${j.assignedUnit}`)
+        .addTo(trafMarkersLayer);
+    });
+
+    // Plot corridor line
+    const corridorCoords = [
+      [28.5672, 77.2100],
+      [28.5685, 77.2110],
+      [28.5720, 77.2200],
+      [28.5689, 77.2340],
+      [28.5275, 77.2135]
+    ];
+
+    L.polyline(corridorCoords, {
+      color: '#218653',
+      weight: 6,
+      opacity: 0.9
+    }).bindPopup('<strong>Authorized Green Corridor #4 (AIIMS -> Max Saket)</strong>').addTo(trafMap);
+  }
+</script>
+{% endblock %}
