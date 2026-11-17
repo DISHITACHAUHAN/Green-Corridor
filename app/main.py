@@ -63,49 +63,50 @@ app.include_router(dashboard_router)
 
 @app.get("/")
 def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="index.html")
 
 
 @app.get("/login")
 def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="login.html")
 
 
 @app.get("/control-room")
 def control_room_page(request: Request):
-    return templates.TemplateResponse("control_room.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="control_room.html")
 
 
 @app.get("/ambulance-management")
 def ambulance_management_page(request: Request):
-    return templates.TemplateResponse("ambulance.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="ambulance.html")
 
 
 @app.get("/hospital-management")
 def hospital_management_page(request: Request):
-    return templates.TemplateResponse("hospital.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="hospital.html")
 
 
 @app.get("/traffic-control")
 def traffic_control_page(request: Request):
-    return templates.TemplateResponse("traffic.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="traffic.html")
 
 
 @app.get("/about")
 def about_page(request: Request):
-    return templates.TemplateResponse("about.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="about.html")
 
 
 @app.get("/contact")
 def contact_page(request: Request):
-    return templates.TemplateResponse("contact.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="contact.html")
 
 
 @app.get("/mission/{mission_id}")
 def mission_detail_page(request: Request, mission_id: str):
     return templates.TemplateResponse(
-        "mission_detail.html",
-        {"request": request, "mission_id": mission_id},
+        request=request,
+        name="mission_detail.html",
+        context={"mission_id": mission_id},
     )
 
 
