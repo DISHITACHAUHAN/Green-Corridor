@@ -24,53 +24,53 @@
     </div>
     <div style="display: flex; gap: 8px;">
       <button type="button" class="btn btn-primary" onclick="openModal('register-ambulance-modal')">
-        ➕ Register Ambulance
+        <i data-lucide="plus" style="width:14px;height:14px;"></i> Register Ambulance
       </button>
       <button type="button" class="btn btn-secondary" onclick="exportTableToCSV('ambulance-table', 'ambulance_fleet.csv')">
-        📥 Export Fleet Data
+        <i data-lucide="download" style="width:14px;height:14px;"></i> Export Fleet Data
       </button>
       <button type="button" class="btn btn-secondary" onclick="location.reload()">
-        🔄 Refresh
+        <i data-lucide="refresh-cw" style="width:14px;height:14px;"></i> Refresh
       </button>
     </div>
   </div>
 
   <!-- 1. Ambulance Overview Stats -->
-  <div class="stats-row">
+  <div class="stats-row stats-5">
     <div class="stat-box stat-blue">
       <div class="stat-data">
         <span class="stat-num" id="amb-stat-total">0</span>
         <span class="stat-label">Total Ambulances</span>
       </div>
-      <div class="stat-icon">🚑</div>
+      <div class="stat-icon"><i data-lucide="truck"></i></div>
     </div>
     <div class="stat-box stat-green">
       <div class="stat-data">
         <span class="stat-num" id="amb-stat-available" style="color: var(--status-green);">0</span>
         <span class="stat-label">Available / Standby</span>
       </div>
-      <div class="stat-icon">🟢</div>
+      <div class="stat-icon"><i data-lucide="circle-check"></i></div>
     </div>
     <div class="stat-box stat-yellow">
       <div class="stat-data">
         <span class="stat-num" id="amb-stat-assigned" style="color: var(--status-yellow);">0</span>
         <span class="stat-label">Assigned</span>
       </div>
-      <div class="stat-icon">🟡</div>
+      <div class="stat-icon"><i data-lucide="clock"></i></div>
     </div>
     <div class="stat-box stat-cyan">
       <div class="stat-data">
         <span class="stat-num" id="amb-stat-enroute" style="color: var(--nav-cyan);">0</span>
         <span class="stat-label">En Route / Mission</span>
       </div>
-      <div class="stat-icon">⚡</div>
+      <div class="stat-icon"><i data-lucide="zap"></i></div>
     </div>
     <div class="stat-box stat-red">
       <div class="stat-data">
         <span class="stat-num" id="amb-stat-offline" style="color: #888;">0</span>
         <span class="stat-label">Offline / Maintenance</span>
       </div>
-      <div class="stat-icon">⚪</div>
+      <div class="stat-icon"><i data-lucide="power-off"></i></div>
     </div>
   </div>
 
@@ -84,7 +84,7 @@
     <!-- Table Toolbar -->
     <div class="table-toolbar">
       <div class="toolbar-left">
-        <input type="text" id="amb-search" class="table-search-input" placeholder="🔍 Search Registration, Driver, ID...">
+        <input type="text" id="amb-search" class="table-search-input" placeholder="Search Registration, Driver, ID...">
         <select id="amb-status-filter" class="table-filter-select">
           <option value="">All Statuses</option>
           <option value="Available">Available</option>
@@ -100,7 +100,7 @@
 
     <!-- The Fleet Table -->
     <div class="table-responsive">
-      <table class="govt-table" id="ambulance-table">
+      <table class="govt-table" id="ambulance-table"><colgroup><col><col><col><col><col><col><col><col><col><col></colgroup><colgroup><col><col><col><col><col><col><col><col><col><col></colgroup>
         <thead>
           <tr>
             <th>Vehicle Reg. No.</th>
@@ -132,7 +132,7 @@
       <div class="mission-detail-grid">
         <!-- Vehicle specs -->
         <div class="detail-card">
-          <h4>🚐 Vehicle Specifications</h4>
+          <h4><i data-lucide="truck" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i> Vehicle Specifications</h4>
           <div class="detail-row"><span class="detail-key">Registration:</span><span class="detail-val" id="det-amb-reg">-</span></div>
           <div class="detail-row"><span class="detail-key">Vehicle Model:</span><span class="detail-val" id="det-amb-model">-</span></div>
           <div class="detail-row"><span class="detail-key">Classification:</span><span class="detail-val" id="det-amb-type">-</span></div>
@@ -142,7 +142,7 @@
 
         <!-- Live Telemetry -->
         <div class="detail-card">
-          <h4>🛰️ Live GPS & Speed Telemetry</h4>
+          <h4><i data-lucide="navigation" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i> Live GPS & Speed Telemetry</h4>
           <div class="detail-row"><span class="detail-key">GPS Lock:</span><span class="detail-val" id="det-amb-gps" style="color:var(--status-green);">Active (8 Satellites)</span></div>
           <div class="detail-row"><span class="detail-key">Current Speed:</span><span class="detail-val" id="det-amb-speed" style="font-size:14px;font-weight:bold;">-</span></div>
           <div class="detail-row"><span class="detail-key">Current Mission:</span><span class="detail-val" id="det-amb-mission">-</span></div>
@@ -152,7 +152,7 @@
 
         <!-- Cold Chain Box -->
         <div class="detail-card">
-          <h4>❄️ Organ Cold-Chain Monitoring Box</h4>
+          <h4><i data-lucide="thermometer-snowflake" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i> Organ Cold-Chain Monitoring Box</h4>
           <div class="detail-row"><span class="detail-key">Container ID:</span><span class="detail-val" id="det-amb-boxid">-</span></div>
           <div class="detail-row"><span class="detail-key">Sensor Temp:</span><span class="detail-val" id="det-amb-temp" style="color:var(--status-green);font-size:16px;font-weight:bold;">-</span></div>
           <div class="detail-row"><span class="detail-key">Optimal Range:</span><span class="detail-val">2.0°C – 6.0°C</span></div>
@@ -163,7 +163,7 @@
 
       <!-- Action buttons -->
       <div style="display: flex; gap: 8px; margin-top: 10px;">
-        <button type="button" class="btn btn-primary btn-sm" onclick="promptAssignMission()">🔄 Assign to Different Mission</button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="promptAssignMission()"><i data-lucide="arrow-right-left" style="width:14px;height:14px;"></i> Assign to Different Mission</button>
         <button type="button" class="btn btn-secondary btn-sm" onclick="toggleVehicleAvailability()">Toggle Availability (Standby / Offline)</button>
       </div>
     </div>

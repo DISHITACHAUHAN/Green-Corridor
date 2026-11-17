@@ -1,7 +1,7 @@
 /* ==========================================================================
    GOVT-PORTAL-REFINEMENTS.CSS
    UI Refinement Pass — Typography, Table Column Widths, Lucide Icons,
-   Navigation single-row, Stats alignment, Hospital table readability
+   Navigation single-row, Stats alignment, Table readability across 4 dashboards
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -63,16 +63,18 @@ body {
 .govt-table {
   font-size: 13px;
   line-height: 1.4;
+  width: 100%;
 }
 
 .govt-table th {
   font-size: 12px;
   font-weight: bold;
-  padding: 7px 9px;
+  padding: 8px 10px;
+  white-space: nowrap;
 }
 
 .govt-table td {
-  padding: 7px 9px;
+  padding: 8px 10px;
   vertical-align: middle;
 }
 
@@ -117,46 +119,62 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   MISSION TABLE (Control Room) — column widths
+   MISSION TABLE (Control Room) — 10 columns
    -------------------------------------------------------------------------- */
-#mission-table colgroup col:nth-child(1)  { width: 13%; }
-#mission-table colgroup col:nth-child(2)  { width: 7%; }
-#mission-table colgroup col:nth-child(3)  { width: 6%; }
+#mission-table colgroup col:nth-child(1)  { width: 12%; }
+#mission-table colgroup col:nth-child(2)  { width: 8%; }
+#mission-table colgroup col:nth-child(3)  { width: 14%; }
 #mission-table colgroup col:nth-child(4)  { width: 14%; }
-#mission-table colgroup col:nth-child(5)  { width: 14%; }
-#mission-table colgroup col:nth-child(6)  { width: 8%; }
-#mission-table colgroup col:nth-child(7)  { width: 8%; }
-#mission-table colgroup col:nth-child(8)  { width: 7%; }
+#mission-table colgroup col:nth-child(5)  { width: 10%; }
+#mission-table colgroup col:nth-child(6)  { width: 12%; }
+#mission-table colgroup col:nth-child(7)  { width: 7%; }
+#mission-table colgroup col:nth-child(8)  { width: 10%; }
 #mission-table colgroup col:nth-child(9)  { width: 7%; }
-#mission-table colgroup col:nth-child(10) { width: 8%; }
-#mission-table colgroup col:nth-child(11) { width: 8%; }
+#mission-table colgroup col:nth-child(10) { width: 6%; }
 
 /* --------------------------------------------------------------------------
-   AMBULANCE TABLE — column widths
+   AMBULANCE TABLE — 10 columns
    -------------------------------------------------------------------------- */
-#fleet-table colgroup col:nth-child(1)  { width: 10%; }
-#fleet-table colgroup col:nth-child(2)  { width: 20%; }
-#fleet-table colgroup col:nth-child(3)  { width: 10%; }
-#fleet-table colgroup col:nth-child(4)  { width: 9%; }
-#fleet-table colgroup col:nth-child(5)  { width: 7%; }
-#fleet-table colgroup col:nth-child(6)  { width: 9%; }
-#fleet-table colgroup col:nth-child(7)  { width: 10%; }
+#ambulance-table colgroup col:nth-child(1),
+#fleet-table colgroup col:nth-child(1)  { width: 11%; }
+#ambulance-table colgroup col:nth-child(2),
+#fleet-table colgroup col:nth-child(2)  { width: 11%; }
+#ambulance-table colgroup col:nth-child(3),
+#fleet-table colgroup col:nth-child(3)  { width: 7%; }
+#ambulance-table colgroup col:nth-child(4),
+#fleet-table colgroup col:nth-child(4)  { width: 14%; }
+#ambulance-table colgroup col:nth-child(5),
+#fleet-table colgroup col:nth-child(5)  { width: 11%; }
+#ambulance-table colgroup col:nth-child(6),
+#fleet-table colgroup col:nth-child(6)  { width: 14%; }
+#ambulance-table colgroup col:nth-child(7),
+#fleet-table colgroup col:nth-child(7)  { width: 8%; }
+#ambulance-table colgroup col:nth-child(8),
 #fleet-table colgroup col:nth-child(8)  { width: 8%; }
-#fleet-table colgroup col:nth-child(9)  { width: 9%; }
+#ambulance-table colgroup col:nth-child(9),
+#fleet-table colgroup col:nth-child(9)  { width: 8%; }
+#ambulance-table colgroup col:nth-child(10),
 #fleet-table colgroup col:nth-child(10) { width: 8%; }
 
 /* --------------------------------------------------------------------------
-   TRAFFIC JUNCTION TABLE — column widths
+   TRAFFIC JUNCTION TABLE — 8 columns
    -------------------------------------------------------------------------- */
+#traffic-table colgroup col:nth-child(1),
 #junction-table colgroup col:nth-child(1) { width: 10%; }
-#junction-table colgroup col:nth-child(2) { width: 22%; }
-#junction-table colgroup col:nth-child(3) { width: 12%; }
-#junction-table colgroup col:nth-child(4) { width: 8%; }
-#junction-table colgroup col:nth-child(5) { width: 9%; }
-#junction-table colgroup col:nth-child(6) { width: 9%; }
-#junction-table colgroup col:nth-child(7) { width: 9%; }
+#traffic-table colgroup col:nth-child(2),
+#junction-table colgroup col:nth-child(2) { width: 20%; }
+#traffic-table colgroup col:nth-child(3),
+#junction-table colgroup col:nth-child(3) { width: 14%; }
+#traffic-table colgroup col:nth-child(4),
+#junction-table colgroup col:nth-child(4) { width: 10%; }
+#traffic-table colgroup col:nth-child(5),
+#junction-table colgroup col:nth-child(5) { width: 10%; }
+#traffic-table colgroup col:nth-child(6),
+#junction-table colgroup col:nth-child(6) { width: 14%; }
+#traffic-table colgroup col:nth-child(7),
+#junction-table colgroup col:nth-child(7) { width: 11%; }
+#traffic-table colgroup col:nth-child(8),
 #junction-table colgroup col:nth-child(8) { width: 11%; }
-#junction-table colgroup col:nth-child(9) { width: 10%; }
 
 /* --------------------------------------------------------------------------
    ACTION BUTTON CONSISTENCY in tables
@@ -213,7 +231,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   NAVBAR — ensure it never wraps on 1280px+ desktop
+   NAVBAR — ensure it never wraps on 1200px+ desktop
    -------------------------------------------------------------------------- */
 @media (min-width: 1200px) {
   .nav-menu {

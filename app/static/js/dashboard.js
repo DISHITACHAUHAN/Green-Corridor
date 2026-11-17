@@ -8,8 +8,9 @@
 
   // 1. Utility Bar Clock (Formatted as e.g. "Tuesday, November 17, 2026 7:23:21 PM")
   function initLiveClock() {
+    const clockText = document.getElementById('utility-clock-text');
     const clockEl = document.getElementById('utility-datetime');
-    if (!clockEl) return;
+    if (!clockEl && !clockText) return;
 
     function update() {
       const now = new Date();
@@ -23,7 +24,12 @@
         second: '2-digit',
         hour12: true
       };
-      clockEl.innerHTML = `🕒 ${now.toLocaleDateString('en-IN', options)}`;
+      const formatted = now.toLocaleDateString('en-IN', options);
+      if (clockText) {
+        clockText.textContent = formatted;
+      } else if (clockEl) {
+        clockEl.textContent = formatted;
+      }
     }
     update();
     setInterval(update, 1000);
@@ -249,6 +255,15 @@
     initNotificationPanel();
     initModalDismiss();
     initTickerControls();
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
   });
+
+  window.refreshIcons = function () {
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  };
 
 })();
