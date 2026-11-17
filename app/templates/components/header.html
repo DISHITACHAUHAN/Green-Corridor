@@ -7,7 +7,10 @@
 <div class="top-utility-bar">
   <div class="utility-container">
     <div class="utility-left">
-      <span class="utility-clock" id="utility-datetime">🕒 Tuesday, November 17, 2026 7:23:21 PM</span>
+      <span class="utility-clock" id="utility-datetime">
+        <i data-lucide="clock" style="width:12px;height:12px;vertical-align:middle;margin-right:3px;"></i>
+        <span id="utility-clock-text">Loading...</span>
+      </span>
       <a href="#main-content" class="utility-link">Skip to Main Content</a>
       <a href="javascript:void(0)" class="utility-link">Screen Reader Access</a>
       <a href="javascript:void(0)" class="utility-link">Sitemap</a>
@@ -21,7 +24,9 @@
       <button type="button" class="lang-selector" onclick="alert('Language toggled: हिन्दी / English')">हिन्दी / English</button>
       <div class="utility-search-box">
         <input type="text" class="utility-search-input" placeholder="Search here..." id="utility-search">
-        <button type="button" class="utility-search-btn" onclick="alert('Search initiated: ' + document.getElementById('utility-search').value)">🔍</button>
+        <button type="button" class="utility-search-btn" onclick="alert('Search initiated: ' + document.getElementById('utility-search').value)">
+          <i data-lucide="search" style="width:12px;height:12px;"></i>
+        </button>
       </div>
     </div>
   </div>
@@ -33,7 +38,7 @@
     <!-- Left Column: Department & Emblem -->
     <div class="header-dept-section">
       <div class="govt-emblem-badge" title="Green Corridor Emblem">
-        <span>⚕</span>
+        <i data-lucide="activity" style="width:22px;height:22px;"></i>
         <span class="emblem-sub">GC-EMS</span>
       </div>
       <div class="header-dept-text">
@@ -47,12 +52,14 @@
     <div class="header-center-section">
       <div class="portal-title">GREEN CORRIDOR AI PLATFORM</div>
       <div class="header-title-divider"></div>
-      <div class="portal-tagline">NATIONAL EMERGENCY ORGAN TRANSPORTATION & TRAFFIC CLEARANCE COORDINATION PORTAL</div>
+      <div class="portal-tagline">NATIONAL EMERGENCY ORGAN TRANSPORTATION &amp; TRAFFIC CLEARANCE COORDINATION PORTAL</div>
     </div>
 
     <!-- Right Column: Emergency Helpline -->
     <div class="header-helpline-section">
-      <div class="helpline-icon-box">📞</div>
+      <div class="helpline-icon-box">
+        <i data-lucide="phone-call" style="width:24px;height:24px;color:var(--portal-red);"></i>
+      </div>
       <div class="helpline-details">
         <div>Emergency Helpline: <strong>108 / 112</strong></div>
         <div>Control Room: <strong>+91-11-26588500</strong></div>
@@ -66,13 +73,21 @@
 <!-- 3. Cyan Navigation Bar -->
 <nav class="cyan-navbar">
   <div class="nav-container">
-    <ul class="nav-menu">
+    <!-- Hamburger toggle (mobile only) -->
+    <button class="nav-hamburger" id="nav-hamburger-btn" aria-label="Toggle navigation"
+      onclick="document.getElementById('nav-menu-list').classList.toggle('nav-menu-open')">
+      <i data-lucide="menu" style="width:20px;height:20px;color:#FFF;"></i>
+    </button>
+
+    <ul class="nav-menu" id="nav-menu-list">
       <li class="nav-item">
-        <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">🏠 Home</a>
+        <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">
+          <i data-lucide="home" style="width:13px;height:13px;vertical-align:middle;margin-right:2px;"></i>Home
+        </a>
       </li>
       <li class="nav-item">
         <a href="/about" class="nav-link {% if request.url.path == '/about' %}active{% endif %}">
-          About Us <span class="arrow-down">▼</span>
+          About <span class="arrow-down">&#9660;</span>
         </a>
         <ul class="nav-dropdown">
           <li><a href="/about">About Green Corridor</a></li>
@@ -83,7 +98,7 @@
       </li>
       <li class="nav-item">
         <a href="javascript:void(0)" class="nav-link">
-          Online Services <span class="arrow-down">▼</span>
+          Services <span class="arrow-down">&#9660;</span>
         </a>
         <ul class="nav-dropdown">
           <li><a href="/control-room" onclick="setTimeout(()=>window.openModal('create-mission-modal'), 300)">Request Organ Corridor</a></li>
@@ -93,39 +108,25 @@
         </ul>
       </li>
       <li class="nav-item">
-        <a href="/control-room" class="nav-link {% if request.url.path == '/control-room' %}active{% endif %}">
-          Control Room
-        </a>
+        <a href="/control-room" class="nav-link {% if request.url.path == '/control-room' %}active{% endif %}">Control Room</a>
       </li>
       <li class="nav-item">
-        <a href="/ambulance-management" class="nav-link {% if request.url.path == '/ambulance-management' %}active{% endif %}">
-          Ambulance Management
-        </a>
+        <a href="/ambulance-management" class="nav-link {% if request.url.path == '/ambulance-management' %}active{% endif %}">Ambulance</a>
       </li>
       <li class="nav-item">
-        <a href="/hospital-management" class="nav-link {% if request.url.path == '/hospital-management' %}active{% endif %}">
-          Hospital Management
-        </a>
+        <a href="/hospital-management" class="nav-link {% if request.url.path == '/hospital-management' %}active{% endif %}">Hospital</a>
       </li>
       <li class="nav-item">
-        <a href="/traffic-control" class="nav-link {% if request.url.path == '/traffic-control' %}active{% endif %}">
-          Traffic Control
-        </a>
+        <a href="/traffic-control" class="nav-link {% if request.url.path == '/traffic-control' %}active{% endif %}">Traffic Control</a>
       </li>
       <li class="nav-item">
-        <a href="/control-room#tracking" class="nav-link">
-          Mission Tracking
-        </a>
+        <a href="/control-room#tracking" class="nav-link">Mission Track</a>
       </li>
       <li class="nav-item">
-        <a href="/control-room#analytics" class="nav-link">
-          Analytics & Reports
-        </a>
+        <a href="/control-room#analytics" class="nav-link">Analytics</a>
       </li>
       <li class="nav-item">
-        <a href="/contact" class="nav-link {% if request.url.path == '/contact' %}active{% endif %}">
-          Contact Us
-        </a>
+        <a href="/contact" class="nav-link {% if request.url.path == '/contact' %}active{% endif %}">Contact</a>
       </li>
     </ul>
 
@@ -134,7 +135,8 @@
       <!-- Notification Bell -->
       <div style="position:relative;">
         <button type="button" class="notif-bell-btn" id="notif-bell-btn" title="System Notifications">
-          🔔 <span class="notif-badge" id="notif-unread-count">3</span>
+          <i data-lucide="bell" style="width:16px;height:16px;"></i>
+          <span class="notif-badge" id="notif-unread-count">3</span>
         </button>
         <!-- Dropdown Notifications Panel -->
         <div id="notif-dropdown-panel" style="display:none;position:absolute;right:0;top:100%;width:340px;background:#FFF;border:1px solid #CCC;box-shadow:0 4px 12px rgba(0,0,0,0.2);z-index:2000;">
@@ -151,7 +153,7 @@
 
       <!-- Auth Portal Button -->
       <a href="/login" class="nav-auth-badge" title="Officer Login">
-        🔒 Officer Login
+        <i data-lucide="lock" style="width:12px;height:12px;vertical-align:middle;margin-right:2px;"></i>Officer Login
       </a>
     </div>
   </div>
@@ -161,18 +163,20 @@
 <div class="announcement-strip">
   <div class="ticker-container">
     <div class="ticker-label">
-      <span>📢 HIGHLIGHTS</span>
+      <i data-lucide="megaphone" style="width:12px;height:12px;margin-right:4px;"></i>HIGHLIGHTS
     </div>
     <div class="ticker-content">
       <div class="ticker-text">
-        ⚡ [ACTIVE CORRIDOR] Mission GC-2026-DEL-435: Kidney transport active on Ring Road AIIMS to Max Saket (ETA: 12 mins). &nbsp;&nbsp;|&nbsp;&nbsp; 
-        🫀 [CRITICAL] Mission GC-2026-DEL-436: Heart harvesting cleared at Safdarjung for Fortis Escorts. &nbsp;&nbsp;|&nbsp;&nbsp; 
-        🚦 [TRAFFIC ALERT] Ashram Chowk & South Extension flyovers activated for emergency clearance. &nbsp;&nbsp;|&nbsp;&nbsp; 
-        🏥 [NOTTO PROTOCOL] All connected hospitals instructed to maintain cold-chain sensors between 2°C and 6°C.
+        &#9889; [ACTIVE CORRIDOR] Mission GC-2026-DEL-435: Kidney transport active on Ring Road AIIMS to Max Saket (ETA: 12 mins). &nbsp;&nbsp;|&nbsp;&nbsp;
+        [CRITICAL] Mission GC-2026-DEL-436: Heart harvesting cleared at Safdarjung for Fortis Escorts. &nbsp;&nbsp;|&nbsp;&nbsp;
+        [TRAFFIC ALERT] Ashram Chowk &amp; South Extension flyovers activated for emergency clearance. &nbsp;&nbsp;|&nbsp;&nbsp;
+        [NOTTO PROTOCOL] All connected hospitals to maintain cold-chain sensors between 2&deg;C and 6&deg;C.
       </div>
     </div>
     <div class="ticker-controls">
-      <button type="button" class="ticker-btn" id="ticker-pause-btn" title="Pause / Play">⏸</button>
+      <button type="button" class="ticker-btn" id="ticker-pause-btn" title="Pause / Play">
+        <i data-lucide="pause" style="width:10px;height:10px;"></i>
+      </button>
     </div>
   </div>
 </div>

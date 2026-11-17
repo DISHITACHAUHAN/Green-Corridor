@@ -292,19 +292,32 @@ a:hover {
 .nav-container {
   max-width: 1320px;
   margin: 0 auto;
-  padding: 0 15px;
+  padding: 0 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0;
+}
+
+/* Hamburger button — hidden on desktop */
+.nav-hamburger {
+  display: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #FFF;
+  flex-shrink: 0;
 }
 
 .nav-menu {
   list-style: none;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-wrap: nowrap;
+  align-items: stretch;
   margin: 0;
   padding: 0;
+  flex: 1;
 }
 
 .nav-item {
@@ -312,15 +325,17 @@ a:hover {
 }
 
 .nav-link {
-  display: block;
-  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  padding: 10px 10px;
   color: #FFFFFF;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: bold;
   text-decoration: none;
   border-right: 1px solid rgba(255, 255, 255, 0.2);
   transition: background-color 0.15s ease;
   white-space: nowrap;
+  height: 100%;
 }
 
 .nav-link:hover,
@@ -551,19 +566,27 @@ a:hover {
    ========================================================================== */
 .stats-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
   margin-bottom: 15px;
+}
+
+/* Force 6-column on wide desktop */
+@media (min-width: 1100px) {
+  .stats-row.stats-6 { grid-template-columns: repeat(6, 1fr); }
+  .stats-row.stats-5 { grid-template-columns: repeat(5, 1fr); }
 }
 
 .stat-box {
   background: #FFFFFF;
   border: 1px solid var(--border-grey);
   border-top: 3px solid var(--nav-cyan);
-  padding: 12px 14px;
+  padding: 10px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+  min-height: 76px;
 }
 .stat-box.stat-blue   { border-top-color: var(--status-blue); }
 .stat-box.stat-green  { border-top-color: var(--status-green); }
@@ -578,24 +601,29 @@ a:hover {
 }
 
 .stat-num {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: bold;
   color: var(--text-main);
   line-height: 1.1;
 }
 
 .stat-label {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-muted);
   font-weight: 600;
-  margin-top: 4px;
+  margin-top: 3px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
 
 .stat-icon {
-  font-size: 28px;
-  opacity: 0.8;
+  color: var(--border-grey);
+  opacity: 0.75;
+  flex-shrink: 0;
+}
+.stat-icon svg {
+  width: 28px;
+  height: 28px;
 }
 
 /* ==========================================================================
@@ -1389,13 +1417,39 @@ a:hover {
     gap: 8px;
     text-align: center;
   }
+  /* Show hamburger on mobile */
+  .nav-hamburger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* Nav menu hidden by default on mobile, shown when .nav-menu-open is toggled */
   .nav-menu {
+    display: none;
     flex-direction: column;
     width: 100%;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: var(--nav-cyan);
+    z-index: 1500;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+  .nav-menu.nav-menu-open {
+    display: flex;
+  }
+  /* Relative positioning context for mobile nav */
+  .cyan-navbar {
+    position: relative;
   }
   .nav-link {
     border-right: none;
     border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 10px 15px;
+    width: 100%;
+  }
+  .nav-right-actions {
+    display: none; /* hide on mobile to avoid clutter */
   }
   .services-grid {
     grid-template-columns: 1fr;

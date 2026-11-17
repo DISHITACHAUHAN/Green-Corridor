@@ -7,6 +7,8 @@
 
   <!-- Government Portal Design Stylesheet -->
   <link rel="stylesheet" href="/static/css/govt-portal.css">
+  <!-- UI Refinements (typography, table widths, Lucide, single-row nav) -->
+  <link rel="stylesheet" href="/static/css/govt-portal-refinements.css">
 
   <!-- Leaflet Maps CSS (OpenStreetMap) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
@@ -16,6 +18,9 @@
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Lucide Icons (professional SVG icon set) -->
+  <script src="https://unpkg.com/lucide@0.408.0/dist/umd/lucide.js"></script>
 
   {% block extra_head %}{% endblock %}
 </head>
@@ -37,5 +42,10 @@
   <script src="/static/js/dashboard.js"></script>
 
   {% block scripts %}{% endblock %}
+
+  <!-- Activate Lucide icons - must run after all page content is inserted -->
+  <script>
+    if (typeof lucide !== 'undefined') { lucide.createIcons(); }
+  </script>
 </body>
 </html>
