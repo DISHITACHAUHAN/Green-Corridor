@@ -196,11 +196,14 @@
   <div class="section-panel">
     <div class="section-panel-header">
       <span class="section-panel-title">Live GIS Transportation Map & Route Clearance</span>
-      <div style="display: flex; gap: 10px; font-size: 11px;">
-        <span>🔵 Donor Hospital</span>
-        <span>🟢 Recipient Hospital</span>
+      <div style="display: flex; align-items: center; gap: 10px; font-size: 11px;">
+        <span class="tracking-status-badge badge badge-neutral">⚪ Tracking Standby</span>
+        <button type="button" class="btn btn-primary btn-sm" style="font-size:11px; padding: 2px 8px;" onclick="startGpsSimulation(selectedMissionId || 'GC-2024-001')">▶ Start GPS Simulator</button>
+        <button type="button" class="btn btn-secondary btn-sm" style="font-size:11px; padding: 2px 8px;" onclick="stopGpsSimulation()">⏹ Stop Simulator</button>
+        <span>🔵 Donor</span>
+        <span>🟢 Recipient</span>
         <span>🚑 Active Convoy</span>
-        <span>🚦 Traffic Junction</span>
+        <span>🚦 Junction</span>
       </div>
     </div>
     <div class="section-panel-body" style="padding: 0;">
@@ -315,6 +318,7 @@
 <script>
   let map, markersLayer, routePolyline;
   let selectedMissionId = null;
+  let liveAmbMarker = null;
 
   document.addEventListener('DOMContentLoaded', function () {
     renderStats();
@@ -600,17 +604,27 @@
     }).addTo(map);
 
     // Moving ambulance marker
+    if (liveAmbMarker && markersLayer) {
+      markersLayer.removeLayer(liveAmbMarker);
+      liveAmbMarker = null;
+    }
+
     const ambIcon = L.divIcon({
-      html: '<div style="font-size:22px;">🚑</div>',
+      html: '<div style="font-size:24px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🚑</div>',
       className: 'amb-map-icon',
-      iconSize: [24, 24]
+      iconSize: [26, 26]
     });
 
-    L.marker([mission.currentLat, mission.currentLng], { icon: ambIcon })
-      .bindPopup(`<strong>Ambulance ${mission.ambulanceId}</strong><br>Driver: ${mission.driverName}<br>ETA: ${mission.etaMinutes} mins`)
+    liveAmbMarker = L.marker([mission.currentLat, mission.currentLng], { icon: ambIcon })
+      .bindPopup(`<strong>Ambulance ${mission.ambulanceId}</strong><br>Driver: ${mission.driverName}<br>ETA: <span class="live-tracking-eta">${mission.etaMinutes} mins</span>`)
       .addTo(markersLayer);
 
     map.fitBounds(routePolyline.getBounds(), { padding: [40, 40] });
+
+    // Connect Phase 8 Real-Time Tracking WebSocket
+    if (window.GC_TRACKER) {
+      window.GC_TRACKER.connect(mission.id, { map: map, marker: liveAmbMarker });
+    }
   }
 
   // 5. Chart.js Implementation
