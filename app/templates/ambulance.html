@@ -203,6 +203,11 @@
   <div class="section-panel">
     <div class="section-panel-header">
       <span class="section-panel-title">Fleet GPS Map — Delhi NCR Operational Sector</span>
+      <div style="display: flex; align-items: center; gap: 8px; font-size: 11px;">
+        <span class="tracking-status-badge badge badge-neutral">⚪ Tracking Standby</span>
+        <button type="button" class="btn btn-primary btn-sm" style="font-size:11px; padding: 2px 8px;" onclick="startGpsSimulation('GC-2024-001', 'AMB-001')">▶ Start GPS Simulator</button>
+        <button type="button" class="btn btn-secondary btn-sm" style="font-size:11px; padding: 2px 8px;" onclick="stopGpsSimulation()">⏹ Stop</button>
+      </div>
     </div>
     <div class="section-panel-body" style="padding: 0;">
       <div id="ambulance-map" class="map-container"></div>
@@ -498,6 +503,7 @@
 
     ambMarkersLayer = L.layerGroup().addTo(ambMap);
 
+    let trackedMarker = null;
     window.GC_DATA.ambulances.forEach(a => {
       const icon = L.divIcon({
         html: `<div style="font-size:20px;">🚑</div>`,
@@ -505,10 +511,18 @@
         iconSize: [22, 22]
       });
 
-      L.marker([a.currentLat, a.currentLng], { icon: icon })
-        .bindPopup(`<strong>${a.registration}</strong><br>Driver: ${a.driverName}<br>Status: ${a.status}<br>Speed: ${a.speed} km/h`)
+      const m = L.marker([a.currentLat, a.currentLng], { icon: icon })
+        .bindPopup(`<strong>${a.registration}</strong><br>Driver: ${a.driverName}<br>Status: ${a.status}<br>Speed: <span class="live-tracking-speed">${a.speed} km/h</span>`)
         .addTo(ambMarkersLayer);
+
+      if (a.id === 'AMB-001' || a.id === '1') {
+        trackedMarker = m;
+      }
     });
+
+    if (window.GC_TRACKER) {
+      window.GC_TRACKER.connect('GC-2024-001', { map: ambMap, marker: trackedMarker });
+    }
   }
 </script>
 {% endblock %}

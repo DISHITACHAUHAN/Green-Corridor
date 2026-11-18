@@ -27,9 +27,16 @@
   </div>
 
   <div class="section-panel">
-    <div class="section-panel-header" style="background:#EAF5F8;">
-      <span class="section-panel-title">Active Telemetry & Manifest Record</span>
-      <span class="badge badge-blue" id="det-page-status">In Transit</span>
+    <div class="section-panel-header" style="background:#EAF5F8; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span class="section-panel-title">Active Telemetry & Manifest Record</span>
+        <span class="badge badge-blue" id="det-page-status">In Transit</span>
+        <span class="tracking-status-badge badge badge-neutral">⚪ Tracking Standby</span>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button type="button" class="btn btn-primary btn-sm" style="font-size:11px; padding:2px 8px;" onclick="startGpsSimulation('{{ mission_id }}')">▶ Start GPS Simulator</button>
+        <button type="button" class="btn btn-secondary btn-sm" style="font-size:11px; padding:2px 8px;" onclick="stopGpsSimulation('{{ mission_id }}')">⏹ Stop</button>
+      </div>
     </div>
     <div class="section-panel-body">
       <div class="mission-detail-grid">
@@ -95,8 +102,8 @@
       L.marker([mission.originLat, mission.originLng]).bindPopup(`<strong>Donor:</strong> ${mission.donorHospital}`).addTo(map);
       L.marker([mission.destLat, mission.destLng]).bindPopup(`<strong>Recipient:</strong> ${mission.recipientHospital}`).addTo(map);
 
-      const ambIcon = L.divIcon({ html: '<div style="font-size:22px;">🚑</div>', className: 'amb-map-icon' });
-      L.marker([mission.currentLat, mission.currentLng], { icon: ambIcon }).bindPopup(`Ambulance: ${mission.ambulanceId}`).addTo(map);
+      const ambIcon = L.divIcon({ html: '<div style="font-size:24px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">🚑</div>', className: 'amb-map-icon' });
+      const ambMarker = L.marker([mission.currentLat, mission.currentLng], { icon: ambIcon }).bindPopup(`Ambulance: ${mission.ambulanceId}`).addTo(map);
 
       const route = L.polyline([
         [mission.originLat, mission.originLng],
@@ -105,6 +112,10 @@
       ], { color: '#12A6B9', weight: 5, dashArray: '8, 4' }).addTo(map);
 
       map.fitBounds(route.getBounds(), { padding: [30, 30] });
+
+      if (window.GC_TRACKER) {
+        window.GC_TRACKER.connect(mission.id, { map: map, marker: ambMarker });
+      }
     }
   });
 </script>
