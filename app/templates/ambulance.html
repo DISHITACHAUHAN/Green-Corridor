@@ -1,0 +1,514 @@
+{% extends "base.html" %}
+
+{% block title %}Ambulance Fleet Management - GPS Tracking & Telemetry | Green Corridor{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div class="breadcrumb-bar">
+  <div class="breadcrumb-container">
+    <a href="/">Home</a>
+    <span class="breadcrumb-separator">&gt;</span>
+    <span>Operational Portals</span>
+    <span class="breadcrumb-separator">&gt;</span>
+    <span class="breadcrumb-current">Ambulance Management</span>
+  </div>
+</div>
+
+<div class="page-container">
+
+  <!-- Page Header Box -->
+  <div class="page-header-box">
+    <div>
+      <h1 class="page-title">Ambulance Fleet Operations & Cold-Chain Telemetry</h1>
+      <div class="page-subtitle">Real-time GPS vehicle tracking, driver allocation, and automated organ box temperature monitoring</div>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button type="button" class="btn btn-primary" onclick="openModal('register-ambulance-modal')">
+        <i data-lucide="plus" style="width:14px;height:14px;"></i> Register Ambulance
+      </button>
+      <button type="button" class="btn btn-secondary" onclick="exportTableToCSV('ambulance-table', 'ambulance_fleet.csv')">
+        <i data-lucide="download" style="width:14px;height:14px;"></i> Export Fleet Data
+      </button>
+      <button type="button" class="btn btn-secondary" onclick="location.reload()">
+        <i data-lucide="refresh-cw" style="width:14px;height:14px;"></i> Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- 1. Ambulance Overview Stats -->
+  <div class="stats-row stats-5">
+    <div class="stat-box stat-blue">
+      <div class="stat-data">
+        <span class="stat-num" id="amb-stat-total">0</span>
+        <span class="stat-label">Total Ambulances</span>
+      </div>
+      <div class="stat-icon"><i data-lucide="truck"></i></div>
+    </div>
+    <div class="stat-box stat-green">
+      <div class="stat-data">
+        <span class="stat-num" id="amb-stat-available" style="color: var(--status-green);">0</span>
+        <span class="stat-label">Available / Standby</span>
+      </div>
+      <div class="stat-icon"><i data-lucide="circle-check"></i></div>
+    </div>
+    <div class="stat-box stat-yellow">
+      <div class="stat-data">
+        <span class="stat-num" id="amb-stat-assigned" style="color: var(--status-yellow);">0</span>
+        <span class="stat-label">Assigned</span>
+      </div>
+      <div class="stat-icon"><i data-lucide="clock"></i></div>
+    </div>
+    <div class="stat-box stat-cyan">
+      <div class="stat-data">
+        <span class="stat-num" id="amb-stat-enroute" style="color: var(--nav-cyan);">0</span>
+        <span class="stat-label">En Route / Mission</span>
+      </div>
+      <div class="stat-icon"><i data-lucide="zap"></i></div>
+    </div>
+    <div class="stat-box stat-red">
+      <div class="stat-data">
+        <span class="stat-num" id="amb-stat-offline" style="color: #888;">0</span>
+        <span class="stat-label">Offline / Maintenance</span>
+      </div>
+      <div class="stat-icon"><i data-lucide="power-off"></i></div>
+    </div>
+  </div>
+
+  <!-- 2. Fleet Monitoring Table -->
+  <div class="section-panel">
+    <div class="section-panel-header">
+      <span class="section-panel-title">Emergency Ambulance Fleet Roster</span>
+      <span style="font-size: 11px; color: #555;">GPS Telemetry Updated Live</span>
+    </div>
+
+    <!-- Table Toolbar -->
+    <div class="table-toolbar">
+      <div class="toolbar-left">
+        <input type="text" id="amb-search" class="table-search-input" placeholder="Search Registration, Driver, ID...">
+        <select id="amb-status-filter" class="table-filter-select">
+          <option value="">All Statuses</option>
+          <option value="Available">Available</option>
+          <option value="En Route">En Route</option>
+          <option value="Assigned">Assigned</option>
+          <option value="Offline">Offline</option>
+        </select>
+      </div>
+      <div class="toolbar-right">
+        <span style="font-size: 12px; color: #666;" id="amb-count-badge">Showing 0 ambulances</span>
+      </div>
+    </div>
+
+    <!-- The Fleet Table -->
+    <div class="table-responsive">
+      <table class="govt-table" id="ambulance-table"><colgroup><col><col><col><col><col><col><col><col><col><col></colgroup><colgroup><col><col><col><col><col><col><col><col><col><col></colgroup>
+        <thead>
+          <tr>
+            <th>Vehicle Reg. No.</th>
+            <th>Ambulance ID</th>
+            <th>Type</th>
+            <th>Assigned Driver</th>
+            <th>Driver Contact</th>
+            <th>Assigned Mission</th>
+            <th>Speed (km/h)</th>
+            <th>GPS Status</th>
+            <th>Vehicle Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="ambulance-tbody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 3. Selected Ambulance Details & Cold-Chain Panel -->
+  <div class="section-panel" id="amb-detail-panel" style="display: none;">
+    <div class="section-panel-header" style="background: #EAF5F8;">
+      <span class="section-panel-title" id="amb-detail-title">Vehicle Telemetry: DL-01-EMG-4402</span>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('amb-detail-panel').style.display='none'">✕ Close</button>
+    </div>
+    <div class="section-panel-body">
+      <div class="mission-detail-grid">
+        <!-- Vehicle specs -->
+        <div class="detail-card">
+          <h4><i data-lucide="truck" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i> Vehicle Specifications</h4>
+          <div class="detail-row"><span class="detail-key">Registration:</span><span class="detail-val" id="det-amb-reg">-</span></div>
+          <div class="detail-row"><span class="detail-key">Vehicle Model:</span><span class="detail-val" id="det-amb-model">-</span></div>
+          <div class="detail-row"><span class="detail-key">Classification:</span><span class="detail-val" id="det-amb-type">-</span></div>
+          <div class="detail-row"><span class="detail-key">Driver Name:</span><span class="detail-val" id="det-amb-driver">-</span></div>
+          <div class="detail-row"><span class="detail-key">Driver Phone:</span><span class="detail-val" id="det-amb-phone">-</span></div>
+        </div>
+
+        <!-- Live Telemetry -->
+        <div class="detail-card">
+          <h4><i data-lucide="navigation" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i> Live GPS & Speed Telemetry</h4>
+          <div class="detail-row"><span class="detail-key">GPS Lock:</span><span class="detail-val" id="det-amb-gps" style="color:var(--status-green);">Active (8 Satellites)</span></div>
+          <div class="detail-row"><span class="detail-key">Current Speed:</span><span class="detail-val" id="det-amb-speed" style="font-size:14px;font-weight:bold;">-</span></div>
+          <div class="detail-row"><span class="detail-key">Current Mission:</span><span class="detail-val" id="det-amb-mission">-</span></div>
+          <div class="detail-row"><span class="detail-key">Destination:</span><span class="detail-val" id="det-amb-dest">Max Saket Trauma Center</span></div>
+          <div class="detail-row"><span class="detail-key">Corridor ETA:</span><span class="detail-val" id="det-amb-eta" style="color:var(--status-green);font-size:14px;">-</span></div>
+        </div>
+
+        <!-- Cold Chain Box -->
+        <div class="detail-card">
+          <h4><i data-lucide="thermometer-snowflake" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i> Organ Cold-Chain Monitoring Box</h4>
+          <div class="detail-row"><span class="detail-key">Container ID:</span><span class="detail-val" id="det-amb-boxid">-</span></div>
+          <div class="detail-row"><span class="detail-key">Sensor Temp:</span><span class="detail-val" id="det-amb-temp" style="color:var(--status-green);font-size:16px;font-weight:bold;">-</span></div>
+          <div class="detail-row"><span class="detail-key">Optimal Range:</span><span class="detail-val">2.0°C – 6.0°C</span></div>
+          <div class="detail-row"><span class="detail-key">Telemetry Link:</span><span class="detail-val" id="det-amb-telemetry">BLE Beacon Connected</span></div>
+          <div class="detail-row"><span class="detail-key">Preservation Status:</span><span class="detail-val" id="det-amb-boxstatus"><span class="badge badge-green">Optimal</span></span></div>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div style="display: flex; gap: 8px; margin-top: 10px;">
+        <button type="button" class="btn btn-primary btn-sm" onclick="promptAssignMission()"><i data-lucide="arrow-right-left" style="width:14px;height:14px;"></i> Assign to Different Mission</button>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="toggleVehicleAvailability()">Toggle Availability (Standby / Offline)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Cold-Chain Sensor Table Section -->
+  <div class="section-panel">
+    <div class="section-panel-header">
+      <span class="section-panel-title">Active Cold-Chain Organ Preservation Telemetry</span>
+      <span style="font-size: 11px; color: #555;">Hardware IoT Sensor Integration (Simulated Data)</span>
+    </div>
+    <div class="table-responsive">
+      <table class="govt-table" id="coldchain-table">
+        <thead>
+          <tr>
+            <th>Preservation Box ID</th>
+            <th>Installed Vehicle</th>
+            <th>Payload Organ</th>
+            <th>Temperature (°C)</th>
+            <th>Target Temp Range</th>
+            <th>Sensor Heartbeat</th>
+            <th>IoT Battery</th>
+            <th>Preservation Integrity</th>
+          </tr>
+        </thead>
+        <tbody id="coldchain-tbody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+    <div style="font-size: 11px; color: #777; padding: 0 10px 10px 10px;">
+      * Temperature values and sensor heartbeats shown are simulated for project demonstration. In production, real-time BLE / MQTT sensor gateways stream to this telemetry endpoint.
+    </div>
+  </div>
+
+  <!-- 5. Fleet Map -->
+  <div class="section-panel">
+    <div class="section-panel-header">
+      <span class="section-panel-title">Fleet GPS Map — Delhi NCR Operational Sector</span>
+    </div>
+    <div class="section-panel-body" style="padding: 0;">
+      <div id="ambulance-map" class="map-container"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal: Register Ambulance -->
+<div class="modal-overlay" id="register-ambulance-modal">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <span class="modal-title">Register New Emergency Ambulance Vehicle</span>
+      <button type="button" class="modal-close-btn" onclick="closeModal('register-ambulance-modal')">&times;</button>
+    </div>
+    <form id="register-ambulance-form" onsubmit="handleRegisterAmbulance(event)">
+      <div class="modal-body">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label class="form-label">Vehicle Registration No: *</label>
+            <input type="text" class="form-control" id="reg-plate" placeholder="e.g. DL-01-EMG-7711" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Vehicle Model & Make: *</label>
+            <input type="text" class="form-control" id="reg-model" placeholder="e.g. Force Traveller ALS" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label class="form-label">Classification Type: *</label>
+            <select class="form-control" id="reg-type" required>
+              <option value="ALS">Advanced Life Support (ALS)</option>
+              <option value="CCU">Critical Care Unit (CCU)</option>
+              <option value="BLS">Basic Life Support (BLS)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Assigned Driver Full Name: *</label>
+            <input type="text" class="form-control" id="reg-driver" placeholder="e.g. Sunil Kumar" required>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label class="form-label">Driver Contact Phone: *</label>
+            <input type="tel" class="form-control" id="reg-phone" placeholder="+91-98765-43210" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">IoT Cold-Chain Box ID:</label>
+            <input type="text" class="form-control" id="reg-boxid" placeholder="e.g. CC-BOX-901">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('register-ambulance-modal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save & Register Vehicle</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let ambMap, ambMarkersLayer;
+  let selectedAmbulance = null;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    renderFleetStats();
+    renderFleetTable();
+    renderColdChainTable();
+    initAmbulanceMap();
+
+    // Search & Filter
+    document.getElementById('amb-search').addEventListener('keyup', filterAmbulanceTable);
+    document.getElementById('amb-status-filter').addEventListener('change', filterAmbulanceTable);
+
+    // View first ambulance details
+    if (window.GC_DATA.ambulances.length > 0) {
+      viewAmbulanceDetails(window.GC_DATA.ambulances[0].id);
+    }
+  });
+
+  function renderFleetStats() {
+    const ambs = window.GC_DATA.ambulances;
+    document.getElementById('amb-stat-total').textContent = ambs.length;
+    document.getElementById('amb-stat-available').textContent = ambs.filter(a => a.status === 'Available').length;
+    document.getElementById('amb-stat-assigned').textContent = ambs.filter(a => a.status === 'Assigned').length;
+    document.getElementById('amb-stat-enroute').textContent = ambs.filter(a => a.status === 'En Route').length;
+    document.getElementById('amb-stat-offline').textContent = ambs.filter(a => a.status === 'Offline').length;
+  }
+
+  function renderFleetTable() {
+    const tbody = document.getElementById('ambulance-tbody');
+    const ambs = window.GC_DATA.ambulances;
+    document.getElementById('amb-count-badge').textContent = `Showing ${ambs.length} ambulances`;
+
+    tbody.innerHTML = ambs.map(a => {
+      let statusBadge = 'badge-grey';
+      if (a.status === 'Available') statusBadge = 'badge-green';
+      else if (a.status === 'En Route') statusBadge = 'badge-blue';
+      else if (a.status === 'Assigned') statusBadge = 'badge-yellow';
+
+      return `
+        <tr>
+          <td><strong>${a.registration}</strong><br><span style="color:#666;font-size:11px;">${a.vehicleModel}</span></td>
+          <td><strong>${a.id}</strong></td>
+          <td><span class="badge ${a.ambulanceType === 'ALS' || a.ambulanceType === 'CCU' ? 'badge-organ' : 'badge-grey'}">${a.ambulanceType}</span></td>
+          <td>${a.driverName}</td>
+          <td>${a.driverContact}</td>
+          <td><strong>${a.assignedMissionId ? '<a href="/control-room" style="color:var(--dark-cyan);">' + a.assignedMissionId + '</a>' : '<span style="color:#888;">Standby</span>'}</strong></td>
+          <td>${a.speed > 0 ? '<strong>' + a.speed + ' km/h</strong>' : '0 km/h (Halted)'}</td>
+          <td>${a.gpsConnected ? '<span style="color:var(--status-green);font-weight:bold;">🟢 Online</span>' : '<span style="color:#888;">⚪ Offline</span>'}</td>
+          <td><span class="badge ${statusBadge}">${a.status}</span></td>
+          <td>
+            <button class="btn btn-primary btn-sm" onclick="viewAmbulanceDetails('${a.id}')">Telemetry</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function renderColdChainTable() {
+    const tbody = document.getElementById('coldchain-tbody');
+    const ambs = window.GC_DATA.ambulances;
+
+    tbody.innerHTML = ambs.map(a => {
+      const cc = a.coldChain;
+      const isOptimal = cc.temperature >= 2.0 && cc.temperature <= 6.0;
+
+      // Find matching mission to get organ type
+      const mission = a.assignedMissionId ? window.GC_DATA.getMissionById(a.assignedMissionId) : null;
+      const organ = mission ? mission.organType : (a.status === 'Available' ? 'Standby (Pre-Cooled)' : 'No payload');
+
+      return `
+        <tr>
+          <td><strong>${cc.boxId}</strong></td>
+          <td>${a.registration} (${a.id})</td>
+          <td><span class="badge badge-organ">● ${organ}</span></td>
+          <td><strong style="color:${isOptimal ? 'var(--status-green)' : 'var(--portal-red)'}; font-size:14px;">${cc.temperature}°C</strong></td>
+          <td>2.0°C – 6.0°C</td>
+          <td>${cc.lastSensorUpdate}</td>
+          <td>${a.gpsConnected ? '98% (Good)' : 'Offline'}</td>
+          <td><span class="badge ${isOptimal ? 'badge-green' : 'badge-red'}">${cc.preservationStatus}</span></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function viewAmbulanceDetails(ambId) {
+    selectedAmbulance = window.GC_DATA.getAmbulanceById(ambId);
+    if (!selectedAmbulance) return;
+
+    const a = selectedAmbulance;
+    document.getElementById('amb-detail-panel').style.display = 'block';
+    document.getElementById('amb-detail-title').textContent = `Vehicle Telemetry & IoT Console: ${a.registration} (${a.id})`;
+
+    document.getElementById('det-amb-reg').textContent = a.registration;
+    document.getElementById('det-amb-model').textContent = a.vehicleModel;
+    document.getElementById('det-amb-type').textContent = a.ambulanceType + ' Level Unit';
+    document.getElementById('det-amb-driver').textContent = a.driverName;
+    document.getElementById('det-amb-phone').textContent = a.driverContact;
+
+    document.getElementById('det-amb-speed').textContent = `${a.speed} km/h`;
+    document.getElementById('det-amb-mission').textContent = a.assignedMissionId || 'None (Standby Fleet)';
+    document.getElementById('det-amb-eta').textContent = a.etaMinutes > 0 ? `${a.etaMinutes} Mins` : 'Standby / N/A';
+
+    document.getElementById('det-amb-boxid').textContent = a.coldChain.boxId;
+    document.getElementById('det-amb-temp').textContent = `${a.coldChain.temperature}°C`;
+    document.getElementById('det-amb-boxstatus').innerHTML = `<span class="badge ${a.coldChain.temperature <= 6.0 ? 'badge-green' : 'badge-red'}">${a.coldChain.preservationStatus}</span>`;
+
+    // Center map on this ambulance
+    if (ambMap) {
+      ambMap.setView([a.currentLat, a.currentLng], 14);
+    }
+  }
+
+  function filterAmbulanceTable() {
+    const searchVal = document.getElementById('amb-search').value.toLowerCase();
+    const statusVal = document.getElementById('amb-status-filter').value;
+    const rows = document.querySelectorAll('#ambulance-tbody tr');
+    let count = 0;
+
+    rows.forEach(row => {
+      const text = row.innerText.toLowerCase();
+      const statusText = row.children[8].innerText.trim();
+      const matchesSearch = text.includes(searchVal);
+      const matchesStatus = !statusVal || statusText === statusVal;
+
+      if (matchesSearch && matchesStatus) {
+        row.style.display = '';
+        count++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    document.getElementById('amb-count-badge').textContent = `Showing ${count} ambulances`;
+  }
+
+  function handleRegisterAmbulance(e) {
+    e.preventDefault();
+    const reg = document.getElementById('reg-plate').value;
+    const model = document.getElementById('reg-model').value;
+    const type = document.getElementById('reg-type').value;
+    const driver = document.getElementById('reg-driver').value;
+    const phone = document.getElementById('reg-phone').value;
+    const boxId = document.getElementById('reg-boxid').value || ('CC-BOX-' + Math.floor(100+Math.random()*900));
+
+    const newId = 'AMB-0' + (window.GC_DATA.ambulances.length + 1);
+
+    const newAmb = {
+      id: newId,
+      registration: reg,
+      vehicleModel: model,
+      ambulanceType: type,
+      driverName: driver,
+      driverContact: phone,
+      assignedMissionId: null,
+      currentLat: 28.5672 + (Math.random() - 0.5) * 0.05,
+      currentLng: 77.2100 + (Math.random() - 0.5) * 0.05,
+      speed: 0,
+      etaMinutes: 0,
+      status: 'Available',
+      gpsConnected: true,
+      coldChain: {
+        boxId: boxId,
+        temperature: 4.0,
+        connected: true,
+        lastSensorUpdate: 'Just now',
+        preservationStatus: 'Standby'
+      }
+    };
+
+    window.GC_DATA.ambulances.push(newAmb);
+    window.GC_DATA.saveAll();
+
+    closeModal('register-ambulance-modal');
+    renderFleetStats();
+    renderFleetTable();
+    renderColdChainTable();
+    viewAmbulanceDetails(newId);
+    window.showToast(`Ambulance ${reg} (${newId}) added to fleet successfully!`, 'success');
+  }
+
+  function promptAssignMission() {
+    if (!selectedAmbulance) return;
+    const missions = window.GC_DATA.missions.filter(m => m.status !== 'Completed');
+    if (missions.length === 0) {
+      alert('No active or pending missions currently need an ambulance assignment.');
+      return;
+    }
+
+    const options = missions.map(m => `${m.id} (${m.organType}: ${m.donorHospital} -> ${m.recipientHospital})`).join('\n');
+    const chosen = prompt(`Enter Mission ID to assign to ${selectedAmbulance.registration}:\n\n` + options, missions[0].id);
+
+    if (chosen) {
+      const match = missions.find(m => m.id.toLowerCase() === chosen.trim().toLowerCase());
+      if (match) {
+        window.GC_DATA.assignAmbulance(selectedAmbulance.id, match.id);
+        renderFleetStats();
+        renderFleetTable();
+        renderColdChainTable();
+        viewAmbulanceDetails(selectedAmbulance.id);
+        window.showToast(`Ambulance assigned to Mission ${match.id}`, 'success');
+      } else {
+        alert('Invalid Mission ID entered.');
+      }
+    }
+  }
+
+  function toggleVehicleAvailability() {
+    if (!selectedAmbulance) return;
+    selectedAmbulance.status = selectedAmbulance.status === 'Available' ? 'Offline' : 'Available';
+    selectedAmbulance.gpsConnected = selectedAmbulance.status === 'Available';
+    window.GC_DATA.saveAll();
+    renderFleetStats();
+    renderFleetTable();
+    viewAmbulanceDetails(selectedAmbulance.id);
+    window.showToast(`Status updated to ${selectedAmbulance.status}`, 'info');
+  }
+
+  function initAmbulanceMap() {
+    const mapEl = document.getElementById('ambulance-map');
+    if (!mapEl) return;
+
+    ambMap = L.map('ambulance-map').setView([28.5672, 77.2100], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(ambMap);
+
+    ambMarkersLayer = L.layerGroup().addTo(ambMap);
+
+    window.GC_DATA.ambulances.forEach(a => {
+      const icon = L.divIcon({
+        html: `<div style="font-size:20px;">🚑</div>`,
+        className: 'amb-marker',
+        iconSize: [22, 22]
+      });
+
+      L.marker([a.currentLat, a.currentLng], { icon: icon })
+        .bindPopup(`<strong>${a.registration}</strong><br>Driver: ${a.driverName}<br>Status: ${a.status}<br>Speed: ${a.speed} km/h`)
+        .addTo(ambMarkersLayer);
+    });
+  }
+</script>
+{% endblock %}

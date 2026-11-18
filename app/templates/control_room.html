@@ -1,0 +1,723 @@
+{% extends "base.html" %}
+
+{% block title %}Central Control Room - Mission Monitoring & Emergency Coordination | Green Corridor{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div class="breadcrumb-bar">
+  <div class="breadcrumb-container">
+    <a href="/">Home</a>
+    <span class="breadcrumb-separator">&gt;</span>
+    <span>Operational Portals</span>
+    <span class="breadcrumb-separator">&gt;</span>
+    <span class="breadcrumb-current">Central Control Room</span>
+  </div>
+</div>
+
+<div class="page-container">
+
+  <!-- Page Header Box -->
+  <div class="page-header-box">
+    <div>
+      <h1 class="page-title">Central Control Room — Command & Coordination Desk</h1>
+      <div class="page-subtitle">Unified emergency organ transit monitoring, active route telematics, and cross-departmental dispatch</div>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button type="button" class="btn btn-primary" onclick="openModal('create-mission-modal')">
+        <i data-lucide="plus" style="width:14px;height:14px;"></i> Create New Mission
+      </button>
+      <button type="button" class="btn btn-secondary" onclick="exportTableToCSV('mission-table', 'control_room_missions.csv')">
+        <i data-lucide="download" style="width:14px;height:14px;"></i> Export CSV
+      </button>
+      <button type="button" class="btn btn-secondary" onclick="location.reload()" title="Refresh Data">
+        <i data-lucide="refresh-cw" style="width:14px;height:14px;"></i> Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- 1. Top Statistics Row (6 Rectangular Stat Boxes) -->
+  <div class="stats-row stats-6">
+    <div class="stat-box stat-blue">
+      <div class="stat-data">
+        <span class="stat-num" id="stat-total-missions">0</span>
+        <span class="stat-label">Total Missions</span>
+      </div>
+      <div class="stat-icon"><i data-lucide="clipboard-list"></i></div>
+    </div>
+    <div class="stat-box stat-green">
+      <div class="stat-data">
+        <span class="stat-num" id="stat-active-missions" style="color: var(--status-green);">0</span>
+        <span class="stat-label">Active Missions</span>
+      </div>
+      <div class="stat-icon"><i data-lucide="zap"></i></div>
+    </div>
+    <div class="stat-box stat-cyan">
+      <div class="stat-data">
+        <span class="stat-num" id="stat-completed-missions">0</span>
+        <span class="stat-label">Completed Missions</span>
+      </div>
+      <div class="stat-icon"><i data-lucide="circle-check"></i></div>
+    </div>
+    <div class="stat-box stat-yellow">
+      <div class="stat-data">
+        <span class="stat-num" id="stat-active-ambulances" style="color: var(--status-yellow);">0</span>
+        <span class="stat-label">Active Ambulances</span>
+      </div>
+      <div class="stat-icon"><i data-lucide="truck"></i></div>
+    </div>
+    <div class="stat-box stat-orange">
+      <div class="stat-data">
+        <span class="stat-num" id="stat-connected-hospitals">0</span>
+        <span class="stat-label">Connected Hospitals</span>
+      </div>
+      <div class="stat-icon"><i data-lucide="building-2"></i></div>
+    </div>
+    <div class="stat-box stat-red">
+      <div class="stat-data">
+        <span class="stat-num" id="stat-emergency-alerts" style="color: var(--status-red);">0</span>
+        <span class="stat-label">Emergency Alerts</span>
+      </div>
+      <div class="stat-icon"><i data-lucide="siren"></i></div>
+    </div>
+  </div>
+
+  <!-- 2. Mission Monitoring Table Section -->
+  <div class="section-panel" id="tracking">
+    <div class="section-panel-header">
+      <span class="section-panel-title">Active Organ Transportation Missions</span>
+      <span style="font-size: 11px; color: #555;">Real-Time GPS Synchronization</span>
+    </div>
+
+    <!-- Table Toolbar -->
+    <div class="table-toolbar">
+      <div class="toolbar-left">
+        <input type="text" id="mission-search" class="table-search-input" placeholder="Search Mission ID, Hospital, Organ...">
+        <select id="status-filter" class="table-filter-select">
+          <option value="">All Statuses</option>
+          <option value="In Transit">In Transit</option>
+          <option value="Dispatched">Dispatched</option>
+          <option value="Created">Created</option>
+          <option value="Completed">Completed</option>
+        </select>
+        <select id="organ-filter" class="table-filter-select">
+          <option value="">All Organs</option>
+          <option value="Heart">Heart</option>
+          <option value="Kidney">Kidney</option>
+          <option value="Liver">Liver</option>
+          <option value="Lungs">Lungs</option>
+          <option value="Pancreas">Pancreas</option>
+        </select>
+      </div>
+      <div class="toolbar-right">
+        <span style="font-size: 12px; color: #666;" id="mission-count-badge">Showing 0 missions</span>
+      </div>
+    </div>
+
+    <!-- The Data Table -->
+    <div class="table-responsive">
+      <table class="govt-table" id="mission-table"><colgroup><col><col><col><col><col><col><col><col><col><col></colgroup>
+        <thead>
+          <tr>
+            <th onclick="sortTable(0)" style="cursor:pointer;">Mission ID ⬍</th>
+            <th onclick="sortTable(1)" style="cursor:pointer;">Organ Type ⬍</th>
+            <th>Donor Hospital</th>
+            <th>Recipient Hospital</th>
+            <th>Ambulance ID</th>
+            <th>Current Location</th>
+            <th onclick="sortTable(6)" style="cursor:pointer;">ETA ⬍</th>
+            <th>Preservation Window</th>
+            <th>Mission Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="mission-tbody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 3. Selected Mission Details Panel (Hidden by default, populated on click) -->
+  <div class="section-panel" id="mission-detail-container" style="display: none;">
+    <div class="section-panel-header" style="background: #EAF5F8; border-left-color: var(--portal-red);">
+      <span class="section-panel-title" id="detail-mission-title">Mission Details: GC-2026-DEL-435</span>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('mission-detail-container').style.display='none'">✕ Close Panel</button>
+    </div>
+    <div class="section-panel-body">
+      <!-- Detail Grid -->
+      <div class="mission-detail-grid">
+        <!-- Col 1: Medical Details -->
+        <div class="detail-card">
+          <h4>🫀 Organ & Clinical Details</h4>
+          <div class="detail-row"><span class="detail-key">Organ Type:</span><span class="detail-val" id="det-organ">-</span></div>
+          <div class="detail-row"><span class="detail-key">Donor Reference:</span><span class="detail-val" id="det-donor-ref">-</span></div>
+          <div class="detail-row"><span class="detail-key">Donor Hospital:</span><span class="detail-val" id="det-donor-hosp">-</span></div>
+          <div class="detail-row"><span class="detail-key">Recipient Hospital:</span><span class="detail-val" id="det-recip-hosp">-</span></div>
+          <div class="detail-row"><span class="detail-key">Harvest Timestamp:</span><span class="detail-val" id="det-harvest-time">-</span></div>
+          <div class="detail-row"><span class="detail-key">Cold Ischemia Limit:</span><span class="detail-val" id="det-max-ischemia">-</span></div>
+        </div>
+
+        <!-- Col 2: Transport & Fleet -->
+        <div class="detail-card">
+          <h4>🚑 Ambulance & Driver Details</h4>
+          <div class="detail-row"><span class="detail-key">Ambulance ID:</span><span class="detail-val" id="det-amb-id">-</span></div>
+          <div class="detail-row"><span class="detail-key">Driver Name:</span><span class="detail-val" id="det-driver-name">-</span></div>
+          <div class="detail-row"><span class="detail-key">Driver Contact:</span><span class="detail-val" id="det-driver-phone">-</span></div>
+          <div class="detail-row"><span class="detail-key">Current Location:</span><span class="detail-val" id="det-location">-</span></div>
+          <div class="detail-row"><span class="detail-key">Distance Remaining:</span><span class="detail-val" id="det-distance">-</span></div>
+          <div class="detail-row"><span class="detail-key">Estimated Arrival (ETA):</span><span class="detail-val" id="det-eta" style="color:var(--status-green);font-size:14px;">-</span></div>
+        </div>
+
+        <!-- Col 3: Corridor & Countdown -->
+        <div class="detail-card">
+          <h4>⏱️ Telemetry & Route Clearance</h4>
+          <div class="detail-row"><span class="detail-key">Corridor Status:</span><span class="detail-val" id="det-corridor-status">-</span></div>
+          <div class="detail-row"><span class="detail-key">Traffic Clearance:</span><span class="detail-val" id="det-traffic-status">Priority Escort</span></div>
+          <div class="detail-row"><span class="detail-key">Preservation Left:</span><span class="detail-val" id="det-preservation-countdown" style="color:var(--portal-red);font-weight:bold;font-size:14px;">-</span></div>
+          <div class="detail-row"><span class="detail-key">Cold-Chain Temperature:</span><span class="detail-val" id="det-temp" style="color:var(--status-green);">4.2°C (Optimal)</span></div>
+          <div style="margin-top: 10px; display: flex; gap: 6px;">
+            <button type="button" class="btn btn-primary btn-sm" id="btn-advance-status" onclick="advanceSelectedMission()">Advance Status</button>
+            <button type="button" class="btn btn-success btn-sm" id="btn-complete-mission" onclick="completeSelectedMission()">Mark Completed</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stepped Timeline -->
+      <div style="margin-top: 15px; border-top: 1px solid #CCC; padding-top: 15px;">
+        <h4 style="font-size: 13px; font-weight: bold; margin-bottom: 8px;">Mission Lifecycle Timeline</h4>
+        <div class="timeline-stepper" id="mission-stepper">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Live Map Tracking Section -->
+  <div class="section-panel">
+    <div class="section-panel-header">
+      <span class="section-panel-title">Live GIS Transportation Map & Route Clearance</span>
+      <div style="display: flex; gap: 10px; font-size: 11px;">
+        <span>🔵 Donor Hospital</span>
+        <span>🟢 Recipient Hospital</span>
+        <span>🚑 Active Convoy</span>
+        <span>🚦 Traffic Junction</span>
+      </div>
+    </div>
+    <div class="section-panel-body" style="padding: 0;">
+      <div id="control-room-map" class="map-container"></div>
+    </div>
+  </div>
+
+  <!-- 5. Analytics Charts Section -->
+  <div class="section-panel" id="analytics">
+    <div class="section-panel-header">
+      <span class="section-panel-title">Mission Analytics & Operational Performance</span>
+      <span style="font-size: 11px; color: #555;">Monthly Audit Statistics</span>
+    </div>
+    <div class="section-panel-body">
+      <div class="chart-grid">
+        <div class="chart-box">
+          <h4>Daily Transport Missions (Last 7 Days)</h4>
+          <canvas id="chart-daily-missions" height="200"></canvas>
+        </div>
+        <div class="chart-box">
+          <h4>Organ-wise Transportation Distribution</h4>
+          <canvas id="chart-organ-dist" height="200"></canvas>
+        </div>
+        <div class="chart-box">
+          <h4>Average Response & Corridor Transit Duration</h4>
+          <canvas id="chart-transit-time" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal: Create New Mission -->
+<div class="modal-overlay" id="create-mission-modal">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <span class="modal-title">Initialize New Organ Transportation Mission</span>
+      <button type="button" class="modal-close-btn" onclick="closeModal('create-mission-modal')">&times;</button>
+    </div>
+    <form id="create-mission-form" onsubmit="handleCreateMission(event)">
+      <div class="modal-body">
+        <div style="background: #EAF5F8; border-left: 3px solid var(--nav-cyan); padding: 8px 12px; font-size: 11px; margin-bottom: 12px;">
+          ℹ️ Creating a mission initiates an automated notification to NOTTO, dispatches corridor clearance requests to Delhi Traffic Police, and notifies the destination trauma OT.
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Organ Type: *</label>
+            <select class="form-control" id="modal-organ" required>
+              <option value="Heart">Heart (Max 4h Cold Ischemia)</option>
+              <option value="Lungs">Lungs (Max 6h Cold Ischemia)</option>
+              <option value="Liver">Liver (Max 12h Cold Ischemia)</option>
+              <option value="Kidney" selected>Kidney (Max 24h Cold Ischemia)</option>
+              <option value="Pancreas">Pancreas (Max 12h Cold Ischemia)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Priority Level: *</label>
+            <select class="form-control" id="modal-priority" required>
+              <option value="Critical" selected>Critical - Zero Delay Escort</option>
+              <option value="High">High - Green Corridor Priority</option>
+              <option value="Medium">Medium - Regular Expedited</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Donor Hospital (Harvest Facility): *</label>
+            <select class="form-control" id="modal-donor-hospital" required>
+              <!-- Filled by JS -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Recipient Hospital (Destination): *</label>
+            <select class="form-control" id="modal-recip-hospital" required>
+              <!-- Filled by JS -->
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group">
+            <label class="form-label">Assign Available Ambulance:</label>
+            <select class="form-control" id="modal-ambulance">
+              <option value="">Auto-Assign Closest Available Ambulance</option>
+              <!-- Filled by JS -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Donor Case / NOTTO Reference ID:</label>
+            <input type="text" class="form-control" id="modal-donor-ref" placeholder="e.g. NOTTO-DL-2026-9901">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Special Transport Instructions / Route Caveats:</label>
+          <textarea class="form-control" id="modal-description" rows="2" placeholder="e.g. Recipient surgical team scrubbed in OT 3; ensure high preservation ice level..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('create-mission-modal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">🚀 Authorize & Dispatch Mission</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let map, markersLayer, routePolyline;
+  let selectedMissionId = null;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    renderStats();
+    populateSelects();
+    renderMissionTable();
+    initMap();
+    initCharts();
+
+    // Table search & filter events
+    document.getElementById('mission-search').addEventListener('keyup', filterTable);
+    document.getElementById('status-filter').addEventListener('change', filterTable);
+    document.getElementById('organ-filter').addEventListener('change', filterTable);
+
+    // Auto-select first active mission for detail panel
+    const missions = window.GC_DATA.missions;
+    if (missions.length > 0) {
+      viewMissionDetails(missions[0].id);
+    }
+  });
+
+  function renderStats() {
+    const stats = window.GC_DATA.getStats();
+    document.getElementById('stat-total-missions').textContent = stats.totalMissions;
+    document.getElementById('stat-active-missions').textContent = stats.activeMissions;
+    document.getElementById('stat-completed-missions').textContent = stats.completedMissions;
+    document.getElementById('stat-active-ambulances').textContent = stats.activeAmbulances;
+    document.getElementById('stat-connected-hospitals').textContent = stats.connectedHospitals;
+    document.getElementById('stat-emergency-alerts').textContent = stats.emergencyAlerts;
+  }
+
+  function populateSelects() {
+    const hospitals = window.GC_DATA.hospitals;
+    const ambulances = window.GC_DATA.ambulances;
+
+    const donorSelect = document.getElementById('modal-donor-hospital');
+    const recipSelect = document.getElementById('modal-recip-hospital');
+    const ambSelect = document.getElementById('modal-ambulance');
+
+    if (donorSelect && recipSelect) {
+      donorSelect.innerHTML = hospitals.map(h => `<option value="${h.name}">${h.name} (${h.city})</option>`).join('');
+      recipSelect.innerHTML = hospitals.map((h, i) => `<option value="${h.name}" ${i===2?'selected':''}>${h.name} (${h.city})</option>`).join('');
+    }
+
+    if (ambSelect) {
+      const availableAmbs = ambulances.filter(a => a.status === 'Available');
+      ambSelect.innerHTML += availableAmbs.map(a => `<option value="${a.id}">${a.registration} (${a.vehicleModel})</option>`).join('');
+    }
+  }
+
+  function renderMissionTable() {
+    const tbody = document.getElementById('mission-tbody');
+    const missions = window.GC_DATA.missions;
+    document.getElementById('mission-count-badge').textContent = `Showing ${missions.length} missions`;
+
+    tbody.innerHTML = missions.map(m => {
+      let statusBadge = 'badge-grey';
+      if (m.status === 'In Transit') statusBadge = 'badge-blue';
+      else if (m.status === 'Completed') statusBadge = 'badge-green';
+      else if (m.status === 'Dispatched') statusBadge = 'badge-yellow';
+      else if (m.status === 'Created') statusBadge = 'badge-yellow';
+
+      let organBadge = 'badge-organ';
+
+      return `
+        <tr id="row-${m.id}">
+          <td><strong><a href="javascript:void(0)" onclick="viewMissionDetails('${m.id}')" style="color:var(--dark-cyan);font-weight:bold;">${m.id}</a></strong></td>
+          <td><span class="badge ${organBadge}">● ${m.organType}</span></td>
+          <td>${m.donorHospital}</td>
+          <td>${m.recipientHospital}</td>
+          <td><strong>${m.ambulanceId || '<span style="color:#888;">Pending</span>'}</strong></td>
+          <td>${m.currentLocation}</td>
+          <td><strong style="color:${m.etaMinutes > 0 ? 'var(--status-green)' : '#666'}">${m.etaMinutes > 0 ? m.etaMinutes + ' Mins' : 'Delivered'}</strong></td>
+          <td><span style="font-size:12px;color:${m.organPreservationMinutes < 120 ? 'var(--portal-red)' : '#333'}">⏳ ${Math.floor(m.organPreservationMinutes/60)}h ${m.organPreservationMinutes%60}m</span></td>
+          <td><span class="badge ${statusBadge}">${m.status}</span></td>
+          <td>
+            <button class="btn btn-primary btn-sm" onclick="viewMissionDetails('${m.id}')">View</button>
+            <button class="btn btn-secondary btn-sm" onclick="quickAdvance('${m.id}')" title="Advance Stage">⚡</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function filterTable() {
+    const searchVal = document.getElementById('mission-search').value.toLowerCase();
+    const statusVal = document.getElementById('status-filter').value;
+    const organVal = document.getElementById('organ-filter').value;
+
+    const rows = document.querySelectorAll('#mission-tbody tr');
+    let count = 0;
+
+    rows.forEach(row => {
+      const text = row.innerText.toLowerCase();
+      const statusText = row.children[8].innerText.trim();
+      const organText = row.children[1].innerText.trim();
+
+      const matchesSearch = text.includes(searchVal);
+      const matchesStatus = !statusVal || statusText === statusVal;
+      const matchesOrgan = !organVal || organText.includes(organVal);
+
+      if (matchesSearch && matchesStatus && matchesOrgan) {
+        row.style.display = '';
+        count++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    document.getElementById('mission-count-badge').textContent = `Showing ${count} missions`;
+  }
+
+  function viewMissionDetails(missionId) {
+    selectedMissionId = missionId;
+    const mission = window.GC_DATA.getMissionById(missionId);
+    if (!mission) return;
+
+    document.getElementById('mission-detail-container').style.display = 'block';
+    document.getElementById('detail-mission-title').textContent = `Mission Details: ${mission.id} (${mission.organType} Transit)`;
+
+    document.getElementById('det-organ').textContent = mission.organType;
+    document.getElementById('det-donor-ref').textContent = mission.donorRefId || 'DONOR-2026-X';
+    document.getElementById('det-donor-hosp').textContent = mission.donorHospital;
+    document.getElementById('det-recip-hosp').textContent = mission.recipientHospital;
+    document.getElementById('det-harvest-time').textContent = new Date(mission.harvestTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    document.getElementById('det-max-ischemia').textContent = `${Math.floor(mission.coldIschemiaMax / 60)} Hours Standard`;
+
+    document.getElementById('det-amb-id').textContent = mission.ambulanceId || 'Unassigned';
+    document.getElementById('det-driver-name').textContent = mission.driverName;
+    document.getElementById('det-driver-phone').textContent = mission.driverContact;
+    document.getElementById('det-location').textContent = mission.currentLocation;
+    document.getElementById('det-distance').textContent = `${mission.distanceRemaining} km`;
+    document.getElementById('det-eta').textContent = mission.etaMinutes > 0 ? `${mission.etaMinutes} Minutes` : 'Delivered (0 min)';
+
+    document.getElementById('det-corridor-status').innerHTML = `<span class="badge ${mission.corridorStatus === 'Activated' ? 'badge-blue' : 'badge-green'}">${mission.corridorStatus}</span>`;
+    document.getElementById('det-preservation-countdown').textContent = `${Math.floor(mission.organPreservationMinutes / 60)}h ${mission.organPreservationMinutes % 60}m Remaining`;
+
+    // Timeline Stepper
+    const stepperEl = document.getElementById('mission-stepper');
+    if (stepperEl && mission.timeline) {
+      stepperEl.innerHTML = mission.timeline.map((step, idx) => {
+        let stepClass = '';
+        if (step.done) stepClass = 'completed';
+        else if (mission.status === 'In Transit' && step.title === 'Organ In Transit') stepClass = 'active';
+
+        return `
+          <div class="timeline-step ${stepClass}">
+            <div class="step-marker">${step.done ? '✓' : (idx + 1)}</div>
+            <div class="step-title">${step.title}</div>
+            <div style="font-size:10px;color:#777;margin-top:2px;">${step.time}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Update map to show this mission's route
+    updateMapForMission(mission);
+  }
+
+  function handleCreateMission(e) {
+    e.preventDefault();
+    const organType = document.getElementById('modal-organ').value;
+    const priority = document.getElementById('modal-priority').value;
+    const donorHospital = document.getElementById('modal-donor-hospital').value;
+    const recipientHospital = document.getElementById('modal-recip-hospital').value;
+    const ambulanceId = document.getElementById('modal-ambulance').value;
+
+    if (donorHospital === recipientHospital) {
+      alert('Donor and Recipient hospitals cannot be the same facility!');
+      return;
+    }
+
+    const newMission = window.GC_DATA.createMission({
+      organType,
+      priority,
+      donorHospital,
+      recipientHospital,
+      ambulanceId: ambulanceId || null
+    });
+
+    closeModal('create-mission-modal');
+    renderStats();
+    renderMissionTable();
+    viewMissionDetails(newMission.id);
+    window.showToast(`Mission ${newMission.id} initialized & broadcast to Traffic Control`, 'success');
+  }
+
+  function advanceSelectedMission() {
+    if (!selectedMissionId) return;
+    quickAdvance(selectedMissionId);
+  }
+
+  function completeSelectedMission() {
+    if (!selectedMissionId) return;
+    window.GC_DATA.updateMissionStatus(selectedMissionId, 'Completed');
+    renderStats();
+    renderMissionTable();
+    viewMissionDetails(selectedMissionId);
+    window.showToast(`Mission ${selectedMissionId} completed successfully!`, 'success');
+  }
+
+  function quickAdvance(missionId) {
+    const mission = window.GC_DATA.getMissionById(missionId);
+    if (!mission) return;
+
+    if (mission.status === 'Created') {
+      window.GC_DATA.updateMissionStatus(missionId, 'Dispatched');
+      window.showToast(`Mission ${missionId}: Ambulance Dispatched!`, 'info');
+    } else if (mission.status === 'Dispatched') {
+      window.GC_DATA.updateMissionStatus(missionId, 'In Transit');
+      window.showToast(`Mission ${missionId}: Green Corridor Activated & In Transit!`, 'warning');
+    } else if (mission.status === 'In Transit') {
+      window.GC_DATA.updateMissionStatus(missionId, 'Completed');
+      window.showToast(`Mission ${missionId}: Handover complete, marked Completed!`, 'success');
+    }
+
+    renderStats();
+    renderMissionTable();
+    viewMissionDetails(missionId);
+  }
+
+  // 4. Leaflet Map Implementation
+  function initMap() {
+    const mapEl = document.getElementById('control-room-map');
+    if (!mapEl) return;
+
+    map = L.map('control-room-map').setView([28.5672, 77.2100], 12);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    markersLayer = L.layerGroup().addTo(map);
+
+    // Add all hospitals
+    window.GC_DATA.hospitals.forEach(h => {
+      const color = h.type === 'Donor' ? 'blue' : (h.type === 'Recipient' ? 'green' : 'purple');
+      const marker = L.circleMarker([h.lat, h.lng], {
+        radius: 8,
+        fillColor: color,
+        color: '#FFFFFF',
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.9
+      }).bindPopup(`<strong>${h.name}</strong><br>${h.type} Facility<br>Available Beds: ${h.availableBeds}`);
+      markersLayer.addLayer(marker);
+    });
+
+    // Add traffic junctions
+    window.GC_DATA.trafficJunctions.forEach(j => {
+      const jColor = j.corridorStatus === 'Activated' ? '#12A6B9' : (j.corridorStatus === 'Cleared' ? '#218653' : '#D97706');
+      const marker = L.circleMarker([j.lat, j.lng], {
+        radius: 6,
+        fillColor: jColor,
+        color: '#000000',
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+      }).bindPopup(`<strong>🚦 ${j.name}</strong><br>Status: ${j.corridorStatus}<br>Assigned: ${j.assignedUnit}`);
+      markersLayer.addLayer(marker);
+    });
+  }
+
+  function updateMapForMission(mission) {
+    if (!map) return;
+
+    if (routePolyline) {
+      map.removeLayer(routePolyline);
+    }
+
+    // Draw route line between donor and recipient
+    const latlngs = [
+      [mission.originLat, mission.originLng],
+      [mission.currentLat, mission.currentLng],
+      [mission.destLat, mission.destLng]
+    ];
+
+    routePolyline = L.polyline(latlngs, {
+      color: '#12A6B9',
+      weight: 5,
+      opacity: 0.85,
+      dashArray: '10, 5'
+    }).addTo(map);
+
+    // Moving ambulance marker
+    const ambIcon = L.divIcon({
+      html: '<div style="font-size:22px;">🚑</div>',
+      className: 'amb-map-icon',
+      iconSize: [24, 24]
+    });
+
+    L.marker([mission.currentLat, mission.currentLng], { icon: ambIcon })
+      .bindPopup(`<strong>Ambulance ${mission.ambulanceId}</strong><br>Driver: ${mission.driverName}<br>ETA: ${mission.etaMinutes} mins`)
+      .addTo(markersLayer);
+
+    map.fitBounds(routePolyline.getBounds(), { padding: [40, 40] });
+  }
+
+  // 5. Chart.js Implementation
+  function initCharts() {
+    // Chart 1: Daily Missions
+    new Chart(document.getElementById('chart-daily-missions'), {
+      type: 'bar',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+          label: 'Completed Transits',
+          data: [4, 6, 5, 8, 7, 9, 6],
+          backgroundColor: '#12A6B9',
+          borderColor: '#07899E',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 2 } } }
+      }
+    });
+
+    // Chart 2: Organ Distribution
+    new Chart(document.getElementById('chart-organ-dist'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Kidney', 'Liver', 'Heart', 'Lungs', 'Pancreas'],
+        datasets: [{
+          data: [45, 28, 14, 8, 5],
+          backgroundColor: ['#218653', '#12A6B9', '#E53935', '#D97706', '#512DA8']
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+        }
+      }
+    });
+
+    // Chart 3: Average Transit Times
+    new Chart(document.getElementById('chart-transit-time'), {
+      type: 'line',
+      data: {
+        labels: ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'],
+        datasets: [
+          {
+            label: 'Green Corridor (Mins)',
+            data: [28, 26, 25, 23, 22, 21],
+            borderColor: '#218653',
+            backgroundColor: 'rgba(33, 134, 83, 0.1)',
+            fill: true,
+            tension: 0.3
+          },
+          {
+            label: 'Normal Traffic (Mins)',
+            data: [65, 68, 62, 70, 66, 64],
+            borderColor: '#E53935',
+            borderDash: [5, 5],
+            fill: false
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } },
+        scales: { y: { title: { display: true, text: 'Minutes' } } }
+      }
+    });
+  }
+
+  // Table Column Sort
+  function sortTable(n) {
+    const table = document.getElementById('mission-table');
+    let rows, switching = true, i, x, y, shouldSwitch, dir = 'asc', switchcount = 0;
+    while (switching) {
+      switching = false;
+      rows = table.rows;
+      for (i = 1; i < (rows.length - 1); i++) {
+        shouldSwitch = false;
+        x = rows[i].getElementsByTagName('TD')[n];
+        y = rows[i + 1].getElementsByTagName('TD')[n];
+        if (dir === 'asc') {
+          if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+            shouldSwitch = true;
+            break;
+          }
+        } else if (dir === 'desc') {
+          if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+            shouldSwitch = true;
+            break;
+          }
+        }
+      }
+      if (shouldSwitch) {
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+        switchcount++;
+      } else {
+        if (switchcount === 0 && dir === 'asc') {
+          dir = 'desc';
+          switching = true;
+        }
+      }
+    }
+  }
+</script>
+{% endblock %}

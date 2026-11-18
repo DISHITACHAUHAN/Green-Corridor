@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Mission Details: {{ mission_id }} - Green Corridor AI Platform{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-bar">
+  <div class="breadcrumb-container">
+    <a href="/">Home</a>
+    <span class="breadcrumb-separator">&gt;</span>
+    <a href="/control-room">Control Room</a>
+    <span class="breadcrumb-separator">&gt;</span>
+    <span class="breadcrumb-current">Mission {{ mission_id }}</span>
+  </div>
+</div>
+
+<div class="page-container">
+
+  <div class="page-header-box">
+    <div>
+      <h1 class="page-title">Mission Monitoring: <span id="det-page-mid">{{ mission_id }}</span></h1>
+      <div class="page-subtitle">Real-time GPS telemetry, cold ischemia countdown, and green corridor clearance status</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <a href="/control-room" class="btn btn-secondary">&larr; Back to Control Room</a>
+      <button type="button" class="btn btn-primary" onclick="window.print()"><i data-lucide="printer" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i> Print Dispatch Manifest</button>
+    </div>
+  </div>
+
+  <div class="section-panel">
+    <div class="section-panel-header" style="background:#EAF5F8;">
+      <span class="section-panel-title">Active Telemetry & Manifest Record</span>
+      <span class="badge badge-blue" id="det-page-status">In Transit</span>
+    </div>
+    <div class="section-panel-body">
+      <div class="mission-detail-grid">
+        <div class="detail-card">
+          <h4><i data-lucide="activity" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i> Clinical Information</h4>
+          <div class="detail-row"><span class="detail-key">Organ:</span><span class="detail-val" id="det-p-organ">Kidney</span></div>
+          <div class="detail-row"><span class="detail-key">Donor Facility:</span><span class="detail-val" id="det-p-donor">AIIMS New Delhi</span></div>
+          <div class="detail-row"><span class="detail-key">Recipient Facility:</span><span class="detail-val" id="det-p-recip">Max Saket</span></div>
+          <div class="detail-row"><span class="detail-key">Cold Ischemia Remaining:</span><span class="detail-val" id="det-p-preservation" style="color:var(--portal-red);font-weight:bold;">23h 10m</span></div>
+        </div>
+        <div class="detail-card">
+          <h4><i data-lucide="truck" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i> Transport Logistics</h4>
+          <div class="detail-row"><span class="detail-key">Ambulance:</span><span class="detail-val" id="det-p-amb">DL-01-EMG-4402</span></div>
+          <div class="detail-row"><span class="detail-key">Driver Name:</span><span class="detail-val" id="det-p-driver">Rajesh Kumar Verma</span></div>
+          <div class="detail-row"><span class="detail-key">Current Location:</span><span class="detail-val" id="det-p-loc">Ring Road Moolchand</span></div>
+          <div class="detail-row"><span class="detail-key">Estimated Arrival:</span><span class="detail-val" id="det-p-eta" style="color:var(--status-green);font-weight:bold;">12 Mins</span></div>
+        </div>
+        <div class="detail-card">
+          <h4><i data-lucide="traffic-cone" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"></i> Traffic & Corridors</h4>
+          <div class="detail-row"><span class="detail-key">Corridor Status:</span><span class="detail-val"><span class="badge badge-green">Activated</span></span></div>
+          <div class="detail-row"><span class="detail-key">Police Escort:</span><span class="detail-val">Delhi Police South Traffic Cell</span></div>
+          <div class="detail-row"><span class="detail-key">Signal Override:</span><span class="detail-val" style="color:var(--status-green);">Green Wave Active</span></div>
+          <div class="detail-row"><span class="detail-key">IoT Box Temp:</span><span class="detail-val" style="color:var(--status-green);">4.2°C (Optimal)</span></div>
+        </div>
+      </div>
+
+      <!-- Map -->
+      <div style="margin-top:20px;">
+        <h4 style="font-size:14px;margin-bottom:8px;">Live GIS Mission Trajectory</h4>
+        <div id="mission-detail-map" class="map-container" style="height:350px;"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const mid = "{{ mission_id }}";
+    const mission = window.GC_DATA.getMissionById(mid) || window.GC_DATA.missions[0];
+
+    if (mission) {
+      document.getElementById('det-page-mid').textContent = mission.id;
+      document.getElementById('det-page-status').textContent = mission.status;
+      document.getElementById('det-p-organ').textContent = mission.organType;
+      document.getElementById('det-p-donor').textContent = mission.donorHospital;
+      document.getElementById('det-p-recip').textContent = mission.recipientHospital;
+      document.getElementById('det-p-amb').textContent = mission.ambulanceId || 'DL-01-EMG-4402';
+      document.getElementById('det-p-driver').textContent = mission.driverName;
+      document.getElementById('det-p-loc').textContent = mission.currentLocation;
+      document.getElementById('det-p-eta').textContent = mission.etaMinutes + ' Mins';
+      document.getElementById('det-p-preservation').textContent = Math.floor(mission.organPreservationMinutes/60) + 'h ' + (mission.organPreservationMinutes%60) + 'm Remaining';
+
+      // Map
+      const map = L.map('mission-detail-map').setView([mission.currentLat, mission.currentLng], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(map);
+
+      L.marker([mission.originLat, mission.originLng]).bindPopup(`<strong>Donor:</strong> ${mission.donorHospital}`).addTo(map);
+      L.marker([mission.destLat, mission.destLng]).bindPopup(`<strong>Recipient:</strong> ${mission.recipientHospital}`).addTo(map);
+
+      const ambIcon = L.divIcon({ html: '<div style="font-size:22px;">🚑</div>', className: 'amb-map-icon' });
+      L.marker([mission.currentLat, mission.currentLng], { icon: ambIcon }).bindPopup(`Ambulance: ${mission.ambulanceId}`).addTo(map);
+
+      const route = L.polyline([
+        [mission.originLat, mission.originLng],
+        [mission.currentLat, mission.currentLng],
+        [mission.destLat, mission.destLng]
+      ], { color: '#12A6B9', weight: 5, dashArray: '8, 4' }).addTo(map);
+
+      map.fitBounds(route.getBounds(), { padding: [30, 30] });
+    }
+  });
+</script>
+{% endblock %}
